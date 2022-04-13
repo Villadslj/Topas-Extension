@@ -10,8 +10,8 @@ Follow step 5 (that is 5a to 5c).
 I recommend to make your own bash script to do the compiling, since its not unlikley you will do this every time you change an extension or want to include new ones. It would something like this: 
 
 (For Debian based systems)
-cd /<path to topas>/
-cmake -DTOPAS_EXTENSIONS_DIR=/<path to this directory>/
+cd <path to topas>
+cmake -DTOPAS_EXTENSIONS_DIR=<path to this directory>
 make
 
 # Dirty Dose.
@@ -26,7 +26,7 @@ s:Sc/DirtyDose/Component                      = "SomeVolume"
 b:Sc/DirtyDose/OutputToConsole                = "FALSE" # (optional)
 s:Sc/DirtyDose/IfOutputFileAlreadyExists      = "Overwrite" # (optional)
 b:Sc/DirtyDose/PropagateToChildren = "True" # (optional)
-s:Sc/DirtyDose/OutputFile = "Output/test/DirtyDose"
+s:Sc/DirtyDose/OutputFile = "Path to output"
 
 # Trip particle Generator
 The TripParticleGenerator.cc (and .hh) generates particles from a .csv source files made in trip (simpel dose planing software, not for clinical use). 
@@ -40,7 +40,7 @@ Example of use:
 s:So/MySource/Type  = "TripParticleGenerator"
 s:So/MySource/Component  = "World"
 i:So/MySource/NumberOfHistoriesInRun = 10000
-s:So/MySource/ParticleSourceFile = "/PathToSourceFile/SourceFile.csv"
+s:So/MySource/ParticleSourceFile = "PathToSourceFile"
 s:So/MySource/BeamParticle = "proton"
 
 
@@ -60,7 +60,7 @@ s:Sc/Ntuple/Component                      = "SomeVolume"
 b:Sc/Ntuple/OutputToConsole                = "TRUE" # (optional)
 s:Sc/Ntuple/IfOutputFileAlreadyExists      = "Overwrite" # (optional)
 b:Sc/Ntuple/PropagateToChildren = "True" # (optional)
-s:Sc/Ntuple/OutputFile = "Output/test/Ntuple"
+s:Sc/Ntuple/OutputFile = "Path to output"
 
 # General LET scorer
 
