@@ -7,7 +7,7 @@ A describtion of how to use them and what they do can be found underneath:
 To include these (or other extensions) to your local Topas software you need to compile it in. 
 It is described very well on the topas website https://sites.google.com/a/topasmc.org/home/user-guides/installation .
 Follow step 5 (that is 5a to 5c).
-I recommend to make your own bash script to do the compiling, since its not unlikley you will do this a lot every time you change an extension or want to include new ones. It would something like this: 
+I recommend to make your own bash script to do the compiling, since its not unlikley you will do this every time you change an extension or want to include new ones. It would something like this: 
 
 (For Debian based systems)
 cd /<path to topas>/
