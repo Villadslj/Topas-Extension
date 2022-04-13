@@ -1,6 +1,6 @@
 # Topas-Extension
 This is a collection of different TOPAS extensions have made through the time. 
-A describtion of how to use them and what they do can be found underneath: 
+A describtion of how to use them and what they do can be found underneath. Feel free to contribute code and your own cool extension to this project you like.
 
 # How to include them in your Topas version
 
