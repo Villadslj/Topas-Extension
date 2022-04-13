@@ -29,5 +29,6 @@ private:
     G4String processname;
     G4String targetName;
     G4String secondaries;
+    G4int processType;
 };
 #endif

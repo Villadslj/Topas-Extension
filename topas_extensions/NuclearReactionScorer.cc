@@ -46,50 +46,63 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep,G4TouchableHistory*)
     ResolveSolid(aStep);
 
 	auto endPoint = aStep->GetPostStepPoint();
+	auto startPoint = aStep->GetPreStepPoint();
+	auto process2 = const_cast<G4VProcess*>(endPoint->GetProcessDefinedStep());
   	auto process = const_cast<G4VProcess*>(endPoint->GetProcessDefinedStep());
 	G4String nuclearChannel = "";
-	// G4cout << process->GetProcessName() << " " << process->GetProcessType() << G4endl;
-	if( process->GetProcessName() == "protonInelastic" || process->GetProcessName() == "neutronInelastic"){ // || (process->GetProcessType() == 6)
-		nuclearChannel = process->GetProcessName() + " : ";
-		processname = process->GetProcessName();
-		auto hproc = const_cast<G4HadronicProcess*>(static_cast<const G4HadronicProcess *>(process));
-		const G4Isotope* target = NULL;
-		if (hproc) {
-			target = hproc->GetTargetIsotope();
-		}
-		targetName = "XXXX";
+	// G4cout << process2->GetProcessName() << G4endl;
+	nuclearChannel = process->GetProcessName() + " : ";
+	processname = process->GetProcessName();
+	auto hproc = const_cast<G4HadronicProcess*>(static_cast<const G4HadronicProcess *>(process));
+	auto hproc2 = const_cast<G4HadronicProcess*>(static_cast<const G4HadronicProcess *>(process2));
+	const G4Isotope* target = NULL;
+	if (hproc && process->GetProcessType() == 4) {
+		target = hproc->GetTargetIsotope();
+	}
+	// else if (hproc && process->GetProcessType() == 2)
+	
+	targetName = "XXXX";
 
-		if (target) {
-			// G4cout << target << G4endl;
-			targetName = target->GetName();
-		}
-		projectile = aStep->GetTrack()->GetDefinition()->GetParticleName();
-		nuclearChannel += aStep->GetTrack()->GetDefinition()->GetParticleName() + " + " + targetName + " -->";
-		// secondaries
+	if (target) {
+		// G4cout << hproc << G4endl;
+		targetName = target->GetName();
+	}
+	projectile = aStep->GetTrack()->GetDefinition()->GetParticleName();
+	if (projectile == "e+" || projectile == "e-" || processname == "ScoringZYBox" || processname == "ScoringZBox") return false;
+	if (processname == "RadioactiveDecayBase"){
+		targetName = "";
+	}
+	nuclearChannel += aStep->GetTrack()->GetDefinition()->GetParticleName() + " + " + targetName + " -->";
+	// secondaries
+	processType = process->GetProcessType();
+	// G4cout << processname << " 	" << processType << G4endl;
+	auto secondary = aStep->GetSecondaryInCurrentStep();
+	auto vec_name = std::vector<G4String>();
+	for (auto  t : *secondary) {
+	vec_name.push_back(t->GetDefinition()->GetParticleName());
+	}
+	std::sort(std::begin(vec_name ), std::end(vec_name ));
+	int first = 0;
+	for(auto  name : vec_name) {
 		
-		auto secondary = aStep->GetSecondaryInCurrentStep();
-		auto vec_name = std::vector<G4String>();
-		for (auto  t : *secondary) {
-		vec_name.push_back(t->GetDefinition()->GetParticleName());
-		}
-		std::sort(std::begin(vec_name ), std::end(vec_name ));
-		int first = 0;
-		for(auto  name : vec_name) {
-			secondaries +=  "+" + name;
-			if (first == 0) nuclearChannel += name;
-			else nuclearChannel += " + " + name;
-			first += 1;
-		}
-
-		if (aStep->GetTrack()->GetTrackStatus() == fAlive) {
-		nuclearChannel += " + " + aStep->GetTrack()->GetDefinition()->GetParticleName();
-		secondaries +=  "+" + aStep->GetTrack()->GetDefinition()->GetParticleName();
-		}
-		
-		G4cout << nuclearChannel << G4endl;
-		fNtuple->Fill();
-		return true;
+		if (first == 0){
+			nuclearChannel += name;
+			secondaries +=  "+" + name.substr(0,4);
+		} 
+		else {
+			nuclearChannel += " + " + name;
+			secondaries +=  "+" + name.substr(0,4);}
+		first += 1;
 	}
 
-    return false;   
+	if (aStep->GetTrack()->GetTrackStatus() == fAlive) {
+	nuclearChannel += " + " + aStep->GetTrack()->GetDefinition()->GetParticleName();
+	G4String particleAlive = "+" + aStep->GetTrack()->GetDefinition()->GetParticleName();
+	secondaries +=  particleAlive.substr(0,4);
+	}
+	
+	// G4cout << nuclearChannel << G4endl;
+	fNtuple->Fill();
+	return true;
+
 }

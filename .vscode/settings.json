@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.icc": "cpp",
+        "string_view": "cpp"
+    }
+}
