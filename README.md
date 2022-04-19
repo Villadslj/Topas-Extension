@@ -2,16 +2,16 @@
 This is a collection of different TOPAS extensions have made through the time. 
 A describtion of how to use them and what they do can be found underneath. Feel free to contribute code and your own cool extension to this project you like.
 
-# How to include them in your Topas version
+# How to include them in your TOPAS version
 
-To include these (or other extensions) to your local Topas software you need to compile it in. 
-It is described very well on the topas website https://sites.google.com/a/topasmc.org/home/user-guides/installation .
+To include these (or other extensions) to your local TOPAS software you need to compile it in. 
+It is described very well on the TOPAS website https://sites.google.com/a/topasmc.org/home/user-guides/installation .
 Follow step 5 (that is 5a to 5c).
 I recommend to make your own bash script to do the compiling, since its not unlikley you will do this every time you change an extension or want to include new ones. It would something like this: 
 
 (For Debian based systems)
 ```
-cd <path to topas>
+cd <path to TOPAS>
 cmake -DTOPAS_EXTENSIONS_DIR=<path to this directory>
 make
 ```
@@ -30,7 +30,7 @@ b:Sc/DirtyDose/PropagateToChildren = "True" # (optional)
 s:Sc/DirtyDose/OutputFile = "Path to output"
 ```
 # Trip particle Generator
-The TripParticleGenerator.cc (and .hh) generates particles from a .csv source files made in trip (simpel dose planing software, not for clinical use). 
+The TripParticleGenerator.cc (and .hh) generates particles from a .csv source files made in TRiP98 (simple research treatment planing software, not for clinical use). 
 But really any .csv file with the coulmns: 
 *ENERGY(GEV) X(CM) Y(CM) FWHM(cm) WEIGHT 
 
