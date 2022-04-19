@@ -22,6 +22,7 @@ public:
     virtual ~NuclearReactionScorer();
 
     G4bool ProcessHits(G4Step*,G4TouchableHistory*);
+    void ClearParameters();
 
 private:
 	// Output variables	
@@ -29,6 +30,7 @@ private:
     G4String processname;
     G4String targetName;
     G4String secondaries;
+    G4String pAlive;
     G4int processType;
 };
 #endif

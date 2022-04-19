@@ -30,6 +30,7 @@ NuclearReactionScorer::NuclearReactionScorer(TsParameterManager* pM, TsMaterialM
 	fNtuple->RegisterColumnS(&projectile, "projectile");
 	fNtuple->RegisterColumnS(&targetName, "targetName");
 	fNtuple->RegisterColumnS(&secondaries, "secondaries");
+	fNtuple->RegisterColumnS(&pAlive, "pAlive");
 
 }
 
@@ -84,25 +85,44 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	std::sort(std::begin(vec_name ), std::end(vec_name ));
 	int first = 0;
 	for(auto  name : vec_name) {
+		if(name == "e-") continue;
 		
 		if (first == 0){
 			nuclearChannel += name;
-			secondaries +=  "+" + name.substr(0,4);
+			secondaries += name.substr(0,4);
+			first += 1;
 		} 
 		else {
 			nuclearChannel += " + " + name;
-			secondaries +=  "+" + name.substr(0,4);}
-		first += 1;
+			secondaries +=  "+" + name.substr(0,4);
+			first += 1;
+		}
 	}
 
 	if (aStep->GetTrack()->GetTrackStatus() == fAlive) {
 	nuclearChannel += " + " + aStep->GetTrack()->GetDefinition()->GetParticleName();
-	G4String particleAlive = "+" + aStep->GetTrack()->GetDefinition()->GetParticleName();
-	secondaries +=  particleAlive.substr(0,4);
+	G4String particleAlive = aStep->GetTrack()->GetDefinition()->GetParticleName();
+	pAlive +=  particleAlive.substr(0,4);
 	}
 	
 	// G4cout << nuclearChannel << G4endl;
-	fNtuple->Fill();
-	return true;
+	if (targetName != "XXXX"){
+		fNtuple->Fill();
+		ClearParameters();
+		return true;	
+	}
+	ClearParameters();
+	return false;
 
 }
+
+void NuclearReactionScorer::ClearParameters(){
+	projectile = "";
+    processname = "";
+    targetName = "";
+    secondaries = "";
+    pAlive = "";
+
+}
+
+
