@@ -46,6 +46,8 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep,G4TouchableHistory*)
     }
     ResolveSolid(aStep);
 
+	ClearParameters();
+
 	auto endPoint = aStep->GetPostStepPoint();
 	auto startPoint = aStep->GetPreStepPoint();
 	auto process2 = const_cast<G4VProcess*>(endPoint->GetProcessDefinedStep());
@@ -75,8 +77,7 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	}
 	nuclearChannel += aStep->GetTrack()->GetDefinition()->GetParticleName() + " + " + targetName + " -->";
 	// secondaries
-	processType = process->GetProcessType();
-	// G4cout << processname << " 	" << processType << G4endl;
+
 	auto secondary = aStep->GetSecondaryInCurrentStep();
 	auto vec_name = std::vector<G4String>();
 	for (auto  t : *secondary) {
@@ -106,12 +107,11 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	}
 	
 	// G4cout << nuclearChannel << G4endl;
-	if (targetName != "XXXX"){
+	if (targetName == "B11" || targetName == "B10"){
+		FillEmptyParm();
 		fNtuple->Fill();
-		ClearParameters();
 		return true;	
 	}
-	ClearParameters();
 	return false;
 
 }
@@ -125,4 +125,13 @@ void NuclearReactionScorer::ClearParameters(){
 
 }
 
+void NuclearReactionScorer::FillEmptyParm(){
+	if (projectile == "") projectile = "empty";
+	if (processname == "") processname = "empty";
+	if (targetName == "") targetName = "empty";
+	if (secondaries == "") secondaries = "empty";
+	if (pAlive == "") pAlive = "empty";
+
+
+}
 

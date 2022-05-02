@@ -22,7 +22,6 @@ public:
 				G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer=false);
 
 	virtual ~MyScoreGeneralLET();
-	G4bool ComputeLET(G4Step*,G4TouchableHistory*,G4ParticleDefinition* Particledef);
 	G4bool ProcessHits(G4Step*,G4TouchableHistory*);
 	G4int CombineSubScorers();
 
@@ -32,9 +31,12 @@ private:
 	G4double fMaxScoredLET;
 	G4double fNeglectSecondariesBelowDensity;
 	G4double fUseFluenceWeightedBelowDensity;
+	std::vector<G4ParticleDefinition*> p;
 
+	bool includeAll;
 	G4ParticleDefinition* Particledef;
 	G4ParticleDefinition* fElectronDefinition;
+	G4ParticleDefinition* fProtonDefinition;
 	G4int fStepCount;
 };
 #endif

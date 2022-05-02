@@ -23,6 +23,7 @@ public:
 
     G4bool ProcessHits(G4Step*,G4TouchableHistory*);
     void ClearParameters();
+    void FillEmptyParm();
 
 private:
 	// Output variables	
@@ -31,6 +32,5 @@ private:
     G4String targetName;
     G4String secondaries;
     G4String pAlive;
-    G4int processType;
 };
 #endif

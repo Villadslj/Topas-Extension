@@ -31,6 +31,7 @@ public:
 // private:
 	std::ifstream file;
 	std::default_random_engine generator;
+	G4double BeamPositionZ;
 	G4String ParticleSourceFile;
 	
 	

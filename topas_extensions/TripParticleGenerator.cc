@@ -42,6 +42,13 @@ TsVGenerator(pM, gM, pgM, sourceName)
 	} else {
 		ParticleSourceFile = fPm->GetStringParameter(GetFullParmName("ParticleSourceFile"));
 	}
+    if (!fPm->ParameterExists(GetFullParmName("BeamPositionZ"))){
+		G4cerr << "Topas is exiting due to a serious error in scoring setup." << G4endl;
+		G4cerr << "BeamPositionZ parameter is missing " << G4endl;
+		exit(1);
+	} else {
+		BeamPositionZ = fPm->GetDoubleParameter(GetFullParmName("BeamPositionZ"), "Length");
+	}
     file.open(ParticleSourceFile); 
 	ResolveParameters();
     pM->SetNeedsSteppingAction();
@@ -102,7 +109,7 @@ std::normal_distribution<double> distributionX(row[1],row[3]);
 std::normal_distribution<double> distributionY(row[2],row[3]);
     p.posX = distributionX(generator) *cm;
     p.posY = distributionY(generator) *cm;
-    p.posZ = 102 *cm;
+    p.posZ = BeamPositionZ;
     p.dCos1 = 0.0;
     p.dCos2 = 0.0;
     p.dCos3 = -1.0; // beam is in negative z direction
