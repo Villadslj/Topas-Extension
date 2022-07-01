@@ -24,6 +24,7 @@ public:
     G4bool ProcessHits(G4Step*,G4TouchableHistory*);
     void ClearParameters();
     void FillEmptyParm();
+    bool CheckSecondaries(std::vector<G4String>& v1, std::vector<G4String>& v2, int l);
 
 private:
 	// Output variables	
@@ -32,5 +33,14 @@ private:
     G4String targetName;
     G4String secondaries;
     G4String pAlive;
+    G4double parentE;
+
+    // User parameters
+    G4String DTarget;
+    G4String DProjectile;
+    G4int slength;
+    std::vector<G4String> DSecondaries;
+    G4int slength2;
+    std::vector<G4String> DSecondaries2;
 };
 #endif
