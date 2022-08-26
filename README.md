@@ -60,6 +60,9 @@ s:Sc/Ntuple/OutputType                     = "ASCII"
 s:Sc/Ntuple/Component                      = "SomeVolume"
 b:Sc/Ntuple/OutputToConsole                = "TRUE" # (optional)
 s:Sc/Ntuple/IfOutputFileAlreadyExists      = "Overwrite" # (optional)
+sv:Sc/Ntuple/Secondaries                   =  2 "neutorn", "alpha"
+s:Sc/Ntuple/Target                         = "oxygen"
+s:Sc/Ntuple/Projectile                     = "proton"
 b:Sc/Ntuple/PropagateToChildren = "True" # (optional)
 s:Sc/Ntuple/OutputFile = "Path to output"
 ```
