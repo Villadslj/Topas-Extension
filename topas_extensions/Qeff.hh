@@ -7,38 +7,30 @@
 // ********************************************************************
 //
 
-#ifndef CustomCross_hh
-#define CustomCross_hh
+#ifndef Qeff_hh
+#define Qeff_hh
 
-#include <random>
-
-#include "TsVNtupleScorer.hh"
-using namespace std;
+#include "TsVBinnedScorer.hh"
 
 class G4ParticleDefinition;
 
-class CustomCross : public TsVNtupleScorer
+class Qeff : public TsVBinnedScorer
 {
 public:
-	CustomCross(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
+	Qeff(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
 								 G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer=false);
-	virtual ~CustomCross();
+	virtual ~Qeff();
 
 	G4bool ProcessHits(G4Step*,G4TouchableHistory*);
 
 private:
-	bool UseMaterialDensity;
-	std::ifstream file;
-	G4double CrossMinE;
-	G4double CrossMaxE;
-	G4double penergy;
-	G4int Count;
+	G4double fMaxScoredLET;
+	G4double fMinScoredLET;
+	G4double fNeglectSecondariesBelowDensity;
 
-	std::default_random_engine generator;
 	G4ParticleDefinition* fProtonDefinition;
-	G4String Crossfile, ReactionElement;
-	G4double TargetConc;
-	vector<double> row;
+	G4ParticleDefinition* fElectronDefinition;
+	G4int fStepCount;
 };
 
 #endif

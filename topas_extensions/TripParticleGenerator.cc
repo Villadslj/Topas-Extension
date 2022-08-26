@@ -79,7 +79,6 @@ int max = 8379;
 // int max = 9450;
 int min = 2;
 
- 
 // Set the TsPrimaryParticle class values
 
 auto lineNumberSought = round(G4UniformRand()*max);
@@ -105,6 +104,7 @@ if (file.is_open()) {
 }
 
 // Lav Double gauss
+// G4RandGauss
 std::normal_distribution<double> distributionX(row[1],row[3]);
 std::normal_distribution<double> distributionY(row[2],row[3]);
     p.posX = distributionX(generator) *cm;

@@ -126,6 +126,16 @@
         "base_pntuple_column_wise": "cpp",
         "h1": "cpp",
         "h2": "cpp",
-        "h3": "cpp"
+        "h3": "cpp",
+        "randt": "cpp",
+        "randd": "cpp",
+        "rtausmed": "cpp",
+        "rtausmef": "cpp",
+        "rtausmeui": "cpp",
+        "value": "cpp",
+        "vec3": "cpp",
+        "vec4": "cpp",
+        "vector3": "cpp",
+        "point": "cpp"
     }
 }

@@ -40,11 +40,19 @@ CustomCross::CustomCross(TsParameterManager* pM, TsMaterialManager* mM, TsGeomet
 
 	UseMaterialDensity = false;
 	if (!fPm->ParameterExists(GetFullParmName("TargetConc"))){
-		UseMaterialDensity = true;
+		if (!fPm->ParameterExists(GetFullParmName("ReactionElement"))){
+			G4cerr << "Topas is exiting due to a serious error in scoring setup." << G4endl;
+			G4cerr << "ReactionElement or TargetConc parameter is missing... And you are an absolute donky ";
+			exit(1);
+		} else {
+			UseMaterialDensity = true;
+			ReactionElement = fPm->GetStringParameter(GetFullParmName("ReactionElement"));
+		}
+
 	} else {
 		TargetConc = fPm->GetUnitlessParameter(GetFullParmName("TargetConc"));
 	}
-
+	
 	file.open(Crossfile);
 
 	string line, csvItem;
@@ -54,7 +62,7 @@ CustomCross::CustomCross(TsParameterManager* pM, TsMaterialManager* mM, TsGeomet
 		while (getline(file,line)) {
 			lineNumber++;
 			istringstream myline(line);
-			while(getline(myline, csvItem, '	')) {
+			while(getline(myline, csvItem, ',')) {
 				row.push_back(stod(csvItem));
 			}
 		}
@@ -79,9 +87,9 @@ G4bool CustomCross::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	ResolveParameters();
 	Count = 0;
 	if (aStep->GetTrack()->GetParticleDefinition()==fProtonDefinition) {
-		
+	
 		// Get particle energy
-		penergy = aStep->GetTrack()->GetKineticEnergy() * MeV;
+		penergy = aStep->GetTrack()->GetKineticEnergy() / MeV;
 		if (penergy < CrossMinE || penergy > CrossMaxE) return false;
 	
 		int index;
@@ -94,31 +102,35 @@ G4bool CustomCross::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 			}
 		}
 		// Find cross section for that energy
-		auto Cross = row[index + 1];
-		// if (!Cross == 100)G4cout << "What?? " << endl;
-		// auto Cross = 50;
+		double Cross = row[index +1];
 		
 		// Find steplength
-		G4double stepLength = aStep->GetStepLength() / cm;
+		G4double stepLength = aStep->GetStepLength() / m;
 		if (stepLength <= 0.)
 			return false;
 
-		// Calculate probability of reaction
+		// Get number of atoms per volume for the desired element
 		if (UseMaterialDensity == true){
 			auto Material = aStep->GetTrack()->GetMaterial();
-			TargetConc = Material->GetTotNbOfAtomsPerVolume()/(1/cm3);
+			auto Ev = Material->GetElementVector();
+			auto NElement = Material->GetNumberOfElements();
+			auto Vna = Material->GetVecNbOfAtomsPerVolume();
+			// G4cout << NElement << G4endl;
+			for (G4int i = 0; i < NElement; i++){
+				auto name = Material->GetElement(i)->GetName();
+				if (name == ReactionElement) {
+				TargetConc = Vna[i] /(1/m3);
+				}
 
+			}
 		}
-		// G4cout << stepLength << G4endl;
+			
 
-		double nb = TargetConc * stepLength * 1.E-24; // pow(10,-24) is converstion from atoms/cm⁻2 to atoms/barns
-		double propRea = nb * Cross;
-		if (propRea > 1){
-			G4cout << "propbabillity to high!" << G4endl;
-		}
-		// G4cout << nb << G4endl;
-		//G4cout << propRea << G4endl;
-		auto ReaTest = G4UniformRand();
+		// Calculate probability of reaction
+		double Sigma = TargetConc * Cross * 1.e-28;
+		double propRea = 1 - exp(-Sigma*stepLength);
+
+		double ReaTest = G4UniformRand();
 		if(ReaTest < propRea){
 			Count = 1;
 			fNtuple->Fill();
