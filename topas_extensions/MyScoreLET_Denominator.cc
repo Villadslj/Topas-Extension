@@ -1,4 +1,4 @@
-// Scorer for ProtonLET_Denominator
+// Scorer for LET_Denominator
 //
 // ********************************************************************
 // *                                                                  *
@@ -11,7 +11,7 @@
 // ********************************************************************
 //
 
-#include "MyScoreProtonLET_Denominator.hh"
+#include "MyScoreLET_Denominator.hh"
 
 #include "TsParameterManager.hh"
 
@@ -19,7 +19,7 @@
 #include "G4ParticleDefinition.hh"
 #include "G4SystemOfUnits.hh"
 
-MyScoreProtonLET_Denominator::MyScoreProtonLET_Denominator(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
+MyScoreLET_Denominator::MyScoreLET_Denominator(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
 														   G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer)
 	:TsVBinnedScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
 {
@@ -46,6 +46,23 @@ MyScoreProtonLET_Denominator::MyScoreProtonLET_Denominator(TsParameterManager* p
 		exit(1);
 	}
 
+	includeAll = false;
+	// Check which particles to include in TOPAS
+	G4String* includeparticles;
+	if (fPm->ParameterExists(GetFullParmName("includeparticles"))){
+		includeparticles = fPm->GetStringVector(GetFullParmName("includeparticles"));
+		G4int length = fPm->GetVectorLength(GetFullParmName("includeparticles"));
+		for (G4int i = 0; i < length; i++) {
+			G4ParticleDefinition* pdef = G4ParticleTable::GetParticleTable()->FindParticle(includeparticles[i]);
+			p.push_back(pdef);
+		}
+
+	}
+	else {
+		G4cout << "All particles are included in LET scoring";
+		includeAll = true;
+	}
+
 	// Upper cutoff to dE/dx (used to fix spikes). Neglected if zero/negative.
 	fMaxScoredLET = 0;
 	if (fPm->ParameterExists(GetFullParmName("MaxScoredLET")))
@@ -65,18 +82,26 @@ MyScoreProtonLET_Denominator::MyScoreProtonLET_Denominator(TsParameterManager* p
 }
 
 
-MyScoreProtonLET_Denominator::~MyScoreProtonLET_Denominator()
+MyScoreLET_Denominator::~MyScoreLET_Denominator()
 {;}
 
 
-G4bool MyScoreProtonLET_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistory*)
+G4bool MyScoreLET_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 {
 	if (!fIsActive) {
 		fSkippedWhileInactive++;
 		return false;
 	}
+	// Checks if particle in scoring volume is part of the lists of desired particles to score LET
+	const G4ParticleDefinition* PDef = aStep->GetTrack()->GetParticleDefinition();
+	if (includeAll == false){
+		if (std::find(p.begin(), p.end(), PDef) != p.end()){
+		}
+		else {
+			return false;
+		}
 
-	if (aStep->GetTrack()->GetParticleDefinition()==fProtonDefinition) {
+	}
 
 		G4double stepLength = aStep->GetStepLength();
 		if (stepLength <= 0.)
@@ -123,6 +148,5 @@ G4bool MyScoreProtonLET_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistor
 			return true;
 		}
 
-	}
 	return false;
 }

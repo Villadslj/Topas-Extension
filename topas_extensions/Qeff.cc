@@ -10,7 +10,7 @@
 
 #include "Qeff.hh"
 #include "TsParameterManager.hh"
-
+#include <math.h>
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4SystemOfUnits.hh"

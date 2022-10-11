@@ -136,6 +136,13 @@
         "vec3": "cpp",
         "vec4": "cpp",
         "vector3": "cpp",
-        "point": "cpp"
+        "point": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "span": "cpp",
+        "stop_token": "cpp",
+        "gl2ps": "cpp"
     }
 }

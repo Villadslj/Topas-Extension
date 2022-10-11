@@ -114,7 +114,7 @@ MyScoreGeneralLET::MyScoreGeneralLET(TsParameterManager* pM, TsMaterialManager* 
 	}
 
 	// Instantiate subscorer needed for denominator
-	InstantiateSubScorer("ProtonLET_Denominator", outFileName, "Denominator");
+	InstantiateSubScorer("LET_Denominator", outFileName, "Denominator");
 }
 
 MyScoreGeneralLET::~MyScoreGeneralLET() {;}
@@ -128,9 +128,11 @@ G4bool MyScoreGeneralLET::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		fSkippedWhileInactive++;
 		return false;
 	}
-	const G4ParticleDefinition* key = aStep->GetTrack()->GetParticleDefinition();
+
+	// Checks if particle in scoring volume is part of the lists of desired particles to score LET
+	const G4ParticleDefinition* PDef = aStep->GetTrack()->GetParticleDefinition();
 	if (includeAll == false){
-		if (std::find(p.begin(), p.end(), key) != p.end()){
+		if (std::find(p.begin(), p.end(), PDef) != p.end()){
 		}
 		else {
 			return false;
@@ -138,6 +140,8 @@ G4bool MyScoreGeneralLET::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 
 	}
 
+
+	// Get the energy deposit and Density of material
 	G4double stepLength = aStep->GetStepLength();
 	if (stepLength <= 0.)
 		return false;
@@ -171,7 +175,7 @@ G4bool MyScoreGeneralLET::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	if (fPreStepLookup) {
 		G4EmCalculator emCal;
 		G4double preStepKE = aStep->GetPreStepPoint()->GetKineticEnergy();
-		dEdx = emCal.ComputeElectronicDEDX(preStepKE, fProtonDefinition, aStep->GetPreStepPoint()->GetMaterial());
+		dEdx = emCal.ComputeElectronicDEDX(preStepKE, PDef, aStep->GetPreStepPoint()->GetMaterial());
 	} else {
 		dEdx = eDep / stepLength;
 	}
