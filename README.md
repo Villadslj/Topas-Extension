@@ -65,12 +65,12 @@ s:Sc/Ntuple/Target                         = "oxygen"
 s:Sc/Ntuple/Projectile                     = "proton"
 b:Sc/Ntuple/PropagateToChildren = "True" # (optional)
 s:Sc/Ntuple/OutputFile = "Path to output"
+```
 
 # Qeff scoring
 
 Scores the Qeff paramter which is an alternative RBE modelling parameter (instead of LETd). 
 It is calculated as: 
-
 
 
 ```
