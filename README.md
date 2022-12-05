@@ -75,11 +75,11 @@ It is calculated as:
 
 ```
 G4double Energy = aTrack->GetKineticEnergy() / MeV;
-	G4double Mass = aTrack->GetParticleDefinition()->GetPDGMass() / MeV;
-	G4double beta = sqrt(1.0 - 1.0 / ( ((Energy / Mass) + 1) * ((Energy / Mass) + 1) ));
-	G4int z = aTrack->GetParticleDefinition()->GetAtomicNumber();
-	G4double Zeff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), -2.0/3.0)));
-	G4double Qeff = Zeff*Zeff/(beta*beta);
+G4double Mass = aTrack->GetParticleDefinition()->GetPDGMass() / MeV;
+G4double beta = sqrt(1.0 - 1.0 / ( ((Energy / Mass) + 1) * ((Energy / Mass) + 1) ));
+G4int z = aTrack->GetParticleDefinition()->GetAtomicNumber();
+G4double Zeff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), -2.0/3.0)));
+G4double Qeff = Zeff*Zeff/(beta*beta);
 ```
 Example off use in TOPAS is 
 
