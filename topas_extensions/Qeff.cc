@@ -129,14 +129,10 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		return false;
 	}
 
-	// Checks if particle in scoring volume is part of the lists of desired particles to score Qeff
-	const G4ParticleDefinition* PDef = aStep->GetTrack()->GetParticleDefinition();
-	if (includeAll == false){
-		if (std::find(p.begin(), p.end(), PDef) != p.end()){
-		}
-		else {
-			return false;
-		}
+	// Checks if particle is an ion.
+	G4int z = aStep->GetTrack()->GetParticleDefinition()->GetAtomicNumber();
+	if (z < 1 || z == NULL){
+		return false;
 
 	}
 
@@ -146,7 +142,7 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	if (stepLength <= 0.)
 		return false;
 
-	G4double eDep = aStep->GetTotalEnergyDeposit();
+	G4double eKin = aStep->GetTrack()->GetKineticEnergy();
 	G4double density = aStep->GetPreStepPoint()->GetMaterial()->GetDensity();
 
 	G4bool isStepFluenceWeighted = !fDoseWeighted || density < fUseFluenceWeightedBelowDensity;
@@ -165,17 +161,16 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 			fStepCount = (*secondary).size();
 
 			for (unsigned int i=(*secondary).size()-diff; i<(*secondary).size(); i++)
-				if ((*secondary)[i]->GetParticleDefinition() == fElectronDefinition)
-					eDep += (*secondary)[i]->GetKineticEnergy();
+				if ((*secondary)[i]->GetParticleDefinition() != fElectronDefinition)
+					eKin += (*secondary)[i]->GetKineticEnergy();
 		}
 	}
 
 	// Compute Qeff
 	auto aTrack = aStep->GetTrack();
-	G4double Energy = eDep / MeV;
-	G4double Mass = 938.277 / MeV; //aTrack->GetParticleDefinition()->GetPDGMass()
+	G4double Energy = aTrack->GetKineticEnergy();
+	G4double Mass = aTrack->GetParticleDefinition()->GetPDGMass();
 	G4double beta = sqrt(1.0 - 1.0 / ( ((Energy / Mass) + 1) * ((Energy / Mass) + 1) ));
-	G4int z = 1; //aTrack->GetParticleDefinition()->GetAtomicNumber();
 	G4double Zeff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), -2.0/3.0)));
 	G4double Qeff = Zeff*Zeff/(beta*beta);
 	// G4cout << Qeff << beta << G4endl;
@@ -187,7 +182,7 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	if (isStepFluenceWeighted)
 		weight *= (stepLength/mm);
 	else
-		weight *= (eDep/MeV);
+		weight *= (eKin/MeV);
 
 	// If dose-weighted and not using PreStepLookup, only score Qeff if below MaxScoredQeff
 	// Also must check if fluence-weighted mode has been enabled by a low density voxel
