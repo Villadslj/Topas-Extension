@@ -6,7 +6,7 @@
 s:So/MySource/Type                     = "Beam"
 s:So/MySource/Component                = "BeamPosition"
 s:So/MySource/BeamParticle             = "proton"
-i:So/MySource/NumberOfHistoriesInRun   = 100000
+i:So/MySource/NumberOfHistoriesInRun   = 10000
 d:So/MySource/BeamEnergy               = 120 MeV
 d:Ge/MySource/RotX=180. deg
 s:So/MySource/BeamPositionDistribution = "Flat"
@@ -103,7 +103,6 @@ s:Sc/Qeff/IfOutputFileAlreadyExists      = "Overwrite"
 sv:Sc/Qeff/includeparticles              = 1 "protons"
 b:Sc/Qeff/PropagateToChildren = "True"
 s:Sc/Qeff/OutputFile =  "Qeff"
-sv:Sc/Qeff/OnlyIncludeParticlesNamed = 1 "proton"
 
 s:Sc/PLET/Quantity                       = "ProtonLET"
 s:Sc/PLET/Component                      = "ScoringZBox"
