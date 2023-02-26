@@ -62,9 +62,10 @@ G4bool Qeff_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		fSkippedWhileInactive++;
 		return false;
 	}
-
+	// Checks if particle is an ion.
 	G4int z = aStep->GetTrack()->GetParticleDefinition()->GetAtomicNumber();
-	if (z < 1 || z == NULL){
+	
+	if (z < 1 || z==NULL){
 		return false;
 
 	}
@@ -76,12 +77,13 @@ G4bool Qeff_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	
 
 	G4double eKin = aStep->GetTrack()->GetKineticEnergy();
+	G4double eDep = aStep->GetTotalEnergyDeposit();
 	G4double density = aStep->GetPreStepPoint()->GetMaterial()->GetDensity();
 
 	// If step is fluence-weighted, we can avoid a lot of logic
 	G4bool isStepFluenceWeighted = !fDoseWeighted;
 	if (isStepFluenceWeighted) {
-		AccumulateHit(aStep, stepLength/mm);
+		AccumulateHit(aStep, stepLength/mm);			
 		return true;
 	}
 	// otherwise we just have to calculate everything again
@@ -89,7 +91,13 @@ G4bool Qeff_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 
 	// Compute Qeff
 	auto aTrack = aStep->GetTrack();
-	G4double Energy = eKin / MeV;
+	G4double Energy;
+	if (eKin==0){
+		Energy = eDep / MeV;
+	}
+	else {
+		Energy = aTrack->GetKineticEnergy();
+	}
 	G4double Mass = aTrack->GetParticleDefinition()->GetPDGMass() / MeV; //aTrack->GetParticleDefinition()->GetPDGMass()
 	G4double beta = sqrt(1.0 - 1.0 / ( ((Energy / Mass) + 1) * ((Energy / Mass) + 1) ));
 	G4double Zeff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), -2.0/3.0)));
@@ -98,7 +106,7 @@ G4bool Qeff_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		
 		// If dose-weighted and not using PreStepLookup, only score Qeff if below MaxScoredQeff
 	if (!isStepFluenceWeighted  || Qeff < fMaxScoredQeff) {
-		AccumulateHit(aStep, eKin/MeV);
+		AccumulateHit(aStep, eDep/MeV);
 		return true;
 	}
 	

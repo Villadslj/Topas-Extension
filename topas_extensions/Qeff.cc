@@ -10,11 +10,12 @@
 #include "Qeff.hh"
 
 #include "TsParameterManager.hh"
-
+#include <cmath>
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4EmCalculator.hh"
 #include "G4UIcommand.hh"
+using namespace std;
 
 Qeff::Qeff(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
 								   G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer)
@@ -62,10 +63,10 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		fSkippedWhileInactive++;
 		return false;
 	}
-
 	// Checks if particle is an ion.
 	G4int z = aStep->GetTrack()->GetParticleDefinition()->GetAtomicNumber();
-	if (z < 1 || z == NULL){
+	
+	if (z < 1 || z==NULL){
 		return false;
 
 	}
@@ -77,18 +78,32 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		return false;
 
 	G4double eKin = aStep->GetTrack()->GetKineticEnergy();
+	G4double eDep = aStep->GetTotalEnergyDeposit();
 	G4double density = aStep->GetPreStepPoint()->GetMaterial()->GetDensity();
 	G4bool isStepFluenceWeighted = !fDoseWeighted;
 
 
 	// Compute Qeff
 	auto aTrack = aStep->GetTrack();
-	G4double Energy = aTrack->GetKineticEnergy();
+	G4double Energy;
+	if (eKin==0){
+		Energy = eDep / MeV;
+	}
+	else {
+		Energy = aTrack->GetKineticEnergy();
+	}
+	
 	G4double Mass = aTrack->GetParticleDefinition()->GetPDGMass();
 	G4double beta = sqrt(1.0 - 1.0 / ( ((Energy / Mass) + 1) * ((Energy / Mass) + 1) ));
 	G4double Zeff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), -2.0/3.0)));
 	G4double Qeff = Zeff*Zeff/(beta*beta);
-
+	if(isnan(Qeff)){
+		G4cout << "Qeff" << Qeff << G4endl;
+		G4cout << "Energy" << Energy << G4endl;
+		G4cout << "Mass" << Mass << G4endl;
+		G4cout << "beta" << beta << G4endl;
+		G4cout << "Zeff" << Zeff << G4endl;
+	}
 	
 
 	// Compute weight (must be unitless in order to use a single denominator sub-scorer)
@@ -96,7 +111,7 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	if (isStepFluenceWeighted)
 		weight *= (stepLength/mm);
 	else
-		weight *= (eKin/MeV);
+		weight *= (eDep/MeV);
 
 	// If dose-weighted and not using PreStepLookup, only score Qeff if below MaxScoredQeff
 	// Also must check if fluence-weighted mode has been enabled by a low density voxel
