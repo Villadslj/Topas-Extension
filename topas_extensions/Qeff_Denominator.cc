@@ -62,54 +62,60 @@ G4bool Qeff_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		fSkippedWhileInactive++;
 		return false;
 	}
-	// Checks if particle is an ion.
-	G4int z = aStep->GetTrack()->GetParticleDefinition()->GetAtomicNumber();
+
 	
-	if (z < 1 || z==NULL){
+	G4Track * theTrack = aStep  ->  GetTrack();
+	G4ParticleDefinition *particleDef = theTrack -> GetDefinition();
+
+	// atomic number
+    G4int Z = particleDef -> GetAtomicNumber();
+    if (Z<1) return false; // calculate only protons and ions
+
+	G4String particleName =  particleDef -> GetParticleName();
+	G4double energyDeposit = aStep -> GetTotalEnergyDeposit();
+	// G4double stepLength = aStep->GetStepLength();
+	G4double DX = aStep -> GetStepLength();
+	if (DX <= 0.)
 		return false;
-
-	}
-
-	G4double stepLength = aStep->GetStepLength();
-	if (stepLength <= 0.)
-		return false;
-	// Checks if particle is an ion.
 	
-
-	G4double eKin = aStep->GetTrack()->GetKineticEnergy();
-	G4double eDep = aStep->GetTotalEnergyDeposit();
-	G4double density = aStep->GetPreStepPoint()->GetMaterial()->GetDensity();
-
-	// If step is fluence-weighted, we can avoid a lot of logic
-	G4bool isStepFluenceWeighted = !fDoseWeighted;
-	if (isStepFluenceWeighted) {
-		AccumulateHit(aStep, stepLength/mm);			
-		return true;
-	}
-	// otherwise we just have to calculate everything again
-
-
-	// Compute Qeff
-	auto aTrack = aStep->GetTrack();
-	G4double Energy;
-	if (eKin==0){
-		Energy = eDep / MeV;
-	}
-	else {
-		Energy = aTrack->GetKineticEnergy();
-	}
-	G4double Mass = aTrack->GetParticleDefinition()->GetPDGMass() / MeV; //aTrack->GetParticleDefinition()->GetPDGMass()
-	G4double beta = sqrt(1.0 - 1.0 / ( ((Energy / Mass) + 1) * ((Energy / Mass) + 1) ));
-	G4double Zeff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), -2.0/3.0)));
-	G4double Qeff = Zeff*Zeff/(beta*beta);
-
-		
-		// If dose-weighted and not using PreStepLookup, only score Qeff if below MaxScoredQeff
-	if (!isStepFluenceWeighted  || Qeff < fMaxScoredQeff) {
-		AccumulateHit(aStep, eDep/MeV);
-		return true;
-	}
+	// get the secondary paticles
+	G4Step fstep = *theTrack -> GetStep();
+	// store all the secondary partilce in current step
+	const std::vector<const G4Track*> * secondary = fstep.GetSecondaryInCurrentStep();
 	
-	return false;
+	size_t SecondarySize = (*secondary).size();
+	G4double EnergySecondary = 0.;
+	
+	// get secondary electrons energy deposited
+	if (SecondarySize) // calculate only secondary particles
+	{
+		for (size_t numsec = 0; numsec< SecondarySize ; numsec ++)
+		{
+			//Get the PDG code of every secondaty particles in current step
+			G4int PDGSecondary=(*secondary)[numsec]->GetDefinition()->GetPDGEncoding();
+			
+			if(PDGSecondary == 11) // calculate only secondary electrons
+			{
+				// calculate the energy deposit of secondary electrons in current step
+				EnergySecondary += (*secondary)[numsec]->GetKineticEnergy();
+			}
+		}		
+	}
+
+	// G4double total_energy_loss = EnergySecondary + energyDeposit; 
+	G4double total_energy_loss = energyDeposit; 
+
+	G4double weight = 1.0;
+	if (fDoseWeighted){
+		// G4cout << " dose weighted " << G4endl;		
+		weight *= total_energy_loss;
+	}
+	else{
+		// G4cout << " track weighted " << G4endl;		
+		weight *= DX;
+	}
+
+	AccumulateHit(aStep, weight);
+	return true;
 
 }

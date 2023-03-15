@@ -21,36 +21,28 @@ Qeff::Qeff(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM,
 								   G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer)
 : TsVBinnedScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
 {
-	SetUnit("");
+	SetUnit("MeV/mm/(g/cm3)");
 
-
-	fStepCount = 0;
-
-	// Dose-averaged or fluence-averaged Qeff definition
+	// Dose-averaged or fluence-averaged LET definition
 	G4String weightType = "dose";
-	if (fPm->ParameterExists(GetFullParmName("WeightBy")))
+	if (fPm->ParameterExists(GetFullParmName("WeightBy"))){
 		weightType = fPm->GetStringParameter(GetFullParmName("WeightBy"));
-	weightType.toLower();
-
-	if (weightType == "dose") {
+		weightType.toLower();
+	}
+	if (weightType == "dose"){
 		fDoseWeighted = true;
-	} else if (weightType == "fluence" || weightType == "track") {
+	}
+	else if (weightType == "fluence" || weightType == "track"){
 		fDoseWeighted = false;
-	} else {
+	}
+	else{
 		G4cerr << "Topas is exiting due to a serious error in scoring setup." << G4endl;
 		G4cerr << GetFullParmName("WeightBy") << " refers to an unknown weighting: " << weightType << G4endl;
 		exit(1);
 	}
-
-	// Upper cutoff to Qeff (used to fix spikes). Neglected if zero/negative.
-	if (fPm->ParameterExists(GetFullParmName("MaxScoredQeff"))) {
-		fMaxScoredQeff = fPm->GetDoubleParameter(GetFullParmName("MaxScoredQeff"), "");
-	} 
 	
-
 	// Instantiate subscorer needed for denominator
-	InstantiateSubScorer("Qeff_Denominator", outFileName, "DenominatorQ");
-}
+	InstantiateSubScorer("Qeff_Denominator", outFileName, "DenominatorQ");}
 
 Qeff::~Qeff() {;}
 
@@ -59,68 +51,101 @@ Qeff::~Qeff() {;}
 G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 {
 	
-	if (!fIsActive) {
+	if (!fIsActive)
+	{
 		fSkippedWhileInactive++;
 		return false;
 	}
-	// Checks if particle is an ion.
-	G4int z = aStep->GetTrack()->GetParticleDefinition()->GetAtomicNumber();
-	
-	if (z < 1 || z==NULL){
+
+	G4Track * theTrack = aStep  ->  GetTrack();
+	G4ParticleDefinition *particleDef = theTrack -> GetDefinition();
+	G4String particleName =  particleDef -> GetParticleName();
+
+	// atomic number
+    G4int Z = particleDef -> GetAtomicNumber();
+    if (Z<1) return false; // calculate only protons and ions
+
+	G4double energyDeposit = aStep -> GetTotalEnergyDeposit();
+	G4double DX = aStep -> GetStepLength();
+
+	if (DX <= 0.)
 		return false;
 
-	}
-
-
-	// Get the energy deposit and Density of material
-	G4double stepLength = aStep->GetStepLength();
-	if (stepLength <= 0.)
-		return false;
-
-	G4double eKin = aStep->GetTrack()->GetKineticEnergy();
-	G4double eDep = aStep->GetTotalEnergyDeposit();
 	G4double density = aStep->GetPreStepPoint()->GetMaterial()->GetDensity();
-	G4bool isStepFluenceWeighted = !fDoseWeighted;
 
-
-	// Compute Qeff
-	auto aTrack = aStep->GetTrack();
-	G4double Energy;
-	if (eKin==0){
-		Energy = eDep / MeV;
-	}
-	else {
-		Energy = aTrack->GetKineticEnergy();
+ 	// Get the pre-step kinetic energy
+	G4double eKinPre = aStep -> GetPreStepPoint() -> GetKineticEnergy();
+	// Get the post-step kinetic energy
+	G4double eKinPost = aStep -> GetPostStepPoint() -> GetKineticEnergy();
+	// Get the step average kinetic energy
+	G4double eKinMean = (eKinPre + eKinPost) * 0.5;
+	
+	// get the material
+	const G4Material * materialStep = aStep -> GetPreStepPoint() -> GetMaterial();
+	
+	// get the secondary paticles
+	G4Step fstep = *theTrack -> GetStep();
+	// store all the secondary partilce in current step
+	const std::vector<const G4Track*> * secondary = fstep.GetSecondaryInCurrentStep();
+	
+	size_t SecondarySize = (*secondary).size();
+	G4double EnergySecondary = 0.;
+	
+	// get secondary electrons energy deposited
+	if (SecondarySize) // calculate only secondary particles
+	{
+		for (size_t numsec = 0; numsec< SecondarySize ; numsec ++)
+		{
+			//Get the PDG code of every secondaty particles in current step
+			G4int PDGSecondary=(*secondary)[numsec]->GetDefinition()->GetPDGEncoding();
+			
+			if(PDGSecondary == 11) // calculate only secondary electrons
+			{
+				// calculate the energy deposit of secondary electrons in current step
+				EnergySecondary += (*secondary)[numsec]->GetKineticEnergy();
+			}
+		}
+		
 	}
 	
-	G4double Mass = aTrack->GetParticleDefinition()->GetPDGMass();
-	G4double beta = sqrt(1.0 - 1.0 / ( ((Energy / Mass) + 1) * ((Energy / Mass) + 1) ));
-	G4double Zeff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), -2.0/3.0)));
-	G4double Qeff = Zeff*Zeff/(beta*beta);
-	if(isnan(Qeff)){
-		G4cout << "Qeff" << Qeff << G4endl;
-		G4cout << "Energy" << Energy << G4endl;
-		G4cout << "Mass" << Mass << G4endl;
-		G4cout << "beta" << beta << G4endl;
-		G4cout << "Zeff" << Zeff << G4endl;
-	}
+    // ICRU stopping power calculation
+    G4EmCalculator emCal;
+    // use the mean kinetic energy of ions in a step to calculate ICRU stopping power
+    G4double dEdx = emCal.ComputeElectronicDEDX(eKinMean, particleDef, materialStep);
 	
+	// G4double total_energy_loss = EnergySecondary + energyDeposit; 
+	G4double total_energy_loss = energyDeposit; 
 
-	// Compute weight (must be unitless in order to use a single denominator sub-scorer)
+
+	// get mass and energy
+	G4double mass_MeV = theTrack -> GetParticleDefinition() -> GetPDGMass() / MeV;
+	G4double energy_MeV =  eKinMean / MeV;
+
+	// get gamma / beta
+	G4double gamma = 1.0 + energy_MeV / mass_MeV;
+	G4double beta = sqrt(1.0 - 1.0 / (gamma * gamma));
+
+	// effective charge following Barkas
+	G4int z = theTrack -> GetParticleDefinition() -> GetAtomicNumber();
+	G4double z_eff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), - 2.0 / 3.0)));
+	G4double Q_eff = (z_eff * z_eff) / (beta * beta);
+
+	
 	G4double weight = 1.0;
-	if (isStepFluenceWeighted)
-		weight *= (stepLength/mm);
-	else
-		weight *= (eDep/MeV);
+	if (fDoseWeighted){
+		// G4cout << " dose weighted " << G4endl;		
+		weight *= total_energy_loss;
+	}
+	else{
+		// G4cout << " track weighted " << G4endl;		
+		weight *= DX;
+	}
 
-	// If dose-weighted and not using PreStepLookup, only score Qeff if below MaxScoredQeff
-	// Also must check if fluence-weighted mode has been enabled by a low density voxel
-	// G4cout << Qeff << G4endl;
-	if (!isStepFluenceWeighted  || Qeff < fMaxScoredQeff) {
-		AccumulateHit(aStep, weight * Qeff / density);
+	if (dEdx > 0){
+		AccumulateHit(aStep, weight * Q_eff / density);
 		return true;
 	}
-	
+
 	return false;
 
 }
