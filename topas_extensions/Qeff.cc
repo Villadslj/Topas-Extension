@@ -17,11 +17,35 @@
 #include "G4UIcommand.hh"
 using namespace std;
 
+
+
 Qeff::Qeff(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
 								   G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer)
 : TsVBinnedScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
 {
-	SetUnit("MeV/mm/(g/cm3)");
+	SetUnit("");
+
+
+	fElectronDefinition = G4ParticleTable::GetParticleTable()->FindParticle("e-");
+	fProtonDefinition = G4ParticleTable::GetParticleTable()->FindParticle("proton");
+
+	fStepCount = 0;
+	includeAll = false;
+	// Check which particles to include in TOPAS
+	G4String* includeparticles;
+	if (fPm->ParameterExists(GetFullParmName("includeparticles"))){
+		includeparticles = fPm->GetStringVector(GetFullParmName("includeparticles"));
+		G4int length = fPm->GetVectorLength(GetFullParmName("includeparticles"));
+		for (G4int i = 0; i < length; i++) {
+			G4ParticleDefinition* pdef = G4ParticleTable::GetParticleTable()->FindParticle(includeparticles[i]);
+			p.push_back(pdef);
+		}
+
+	}
+	else {
+		G4cout << "All particles are included in Qeff scoring";
+		includeAll = true;
+	}
 
 	// Dose-averaged or fluence-averaged LET definition
 	G4String weightType = "dose";
@@ -57,6 +81,19 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		return false;
 	}
 
+
+	
+	// Checks if particle in scoring volume is part of the lists of desired particles to score Qeff
+	const G4ParticleDefinition* PDef = aStep->GetTrack()->GetParticleDefinition();
+	if (includeAll == false){
+		if (std::find(p.begin(), p.end(), PDef) != p.end()){
+		}
+		else {
+			return false;
+		}
+
+	}
+
 	G4Track * theTrack = aStep  ->  GetTrack();
 	G4ParticleDefinition *particleDef = theTrack -> GetDefinition();
 	G4String particleName =  particleDef -> GetParticleName();
@@ -72,6 +109,7 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		return false;
 
 	G4double density = aStep->GetPreStepPoint()->GetMaterial()->GetDensity();
+	//G4cout << "density" << density << G4endl;
 
  	// Get the pre-step kinetic energy
 	G4double eKinPre = aStep -> GetPreStepPoint() -> GetKineticEnergy();
@@ -129,12 +167,16 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	G4int z = theTrack -> GetParticleDefinition() -> GetAtomicNumber();
 	G4double z_eff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), - 2.0 / 3.0)));
 	G4double Q_eff = (z_eff * z_eff) / (beta * beta);
-
 	
+	
+	//G4cout << mass_MeV << ", q eff = " << Q_eff << " beta = " << beta << G4endl;
+
+
 	G4double weight = 1.0;
 	if (fDoseWeighted){
 		// G4cout << " dose weighted " << G4endl;		
 		weight *= total_energy_loss;
+		//G4cout << "weight = " << weight << G4endl;
 	}
 	else{
 		// G4cout << " track weighted " << G4endl;		
@@ -142,25 +184,37 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	}
 
 	if (dEdx > 0){
-		AccumulateHit(aStep, weight * Q_eff / density);
+		AccumulateHit(aStep, weight * Q_eff);
+		//AccumulateHit(aStep, weight * Q_eff);
+		//G4cout << "density" << density << G4endl;
 		return true;
 	}
 
 	return false;
-
+	
 }
+
+
 
 G4int Qeff::CombineSubScorers()
 {
 	G4int counter = 0;
-
+	G4double QeffMax = 16000;
 	TsVBinnedScorer* denomScorer = dynamic_cast<TsVBinnedScorer*>(GetSubScorer("DenominatorQ"));
 	for (G4int index=0; index < fNDivisions; index++) {
 		if (denomScorer->fFirstMomentMap[index]==0.) {
 			fFirstMomentMap[index] = 0;
 			counter++;
 		} else {
+			//G4cout << "index = " << index << G4endl;
+			//G4cout << "tæller = " << fFirstMomentMap[index] << G4endl;
+			//G4cout << "denom = " << denomScorer->fFirstMomentMap[index] << G4endl;
 			fFirstMomentMap[index] = fFirstMomentMap[index] / denomScorer->fFirstMomentMap[index];
+			
+			if (fFirstMomentMap[index] > QeffMax){
+				G4cout << "fFirstMomentMap" << fFirstMomentMap[index] << G4endl;
+			}
+			//G4cout << "brøk = " << fFirstMomentMap[index] << G4endl;
 		}
 	}
 
