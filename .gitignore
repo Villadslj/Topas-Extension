@@ -1,15 +1,8 @@
 cmakeTopas.sh
 *.csv
 *.json
-SOI*
-bench/RootParticleSource.cc
-Dev/RootParticleSource.cc
-bench/RootParticleSource.hh
-Dev/RootParticleSource.hh
-bench/buildtopas.sh
 .gitignore
 .vscode/c_cpp_properties.json
 tests/buildtopas.sh
-
-topas_extensions/MyScore*
-topas_extensions/MyScore*
+Dev/*
+bench/*
