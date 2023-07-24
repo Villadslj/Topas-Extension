@@ -89,8 +89,12 @@ s:Sc/Qeff/Quantity                       = "Qeff"
 s:Sc/Qeff/Component                      = "SomeVolume"
 s:Sc/Qeff/OutputFile =  "Qeff"
 ```
-# General LET scorer
-
-It does not work yet... 
-But it should be able to score the LET of what ever particles you are interested in or just all of them. 
-But for now it have to wait...
+# Hadron LET scorer
+Scores LET for all hadrons and not only protons
+```
+s:Sc/HadronTLET/Quantity                   = "myHadronLET"
+s:Sc/HadronTLET/Component                  = "SomeVolume"
+s:Sc/HadronTLET/WeightBy                   = "fluence" # or dose
+s:Sc/HadronTLET/IfOutputFileAlreadyExists  = "Overwrite"
+sv:Sc/HadronTLET/Report                    = 2 "Sum" "Standard_Deviation"
+```
