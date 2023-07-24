@@ -87,6 +87,7 @@ Example off use in TOPAS is
 Example of use:
 s:Sc/Qeff/Quantity                       = "Qeff"
 s:Sc/Qeff/Component                      = "SomeVolume"
+s:Sc/Qeff/WeightBy                   = "fluence" # or dose
 s:Sc/Qeff/OutputFile =  "Qeff"
 ```
 # Hadron LET scorer
@@ -96,7 +97,6 @@ s:Sc/HadronTLET/Quantity                   = "myHadronLET"
 s:Sc/HadronTLET/Component                  = "SomeVolume"
 s:Sc/HadronTLET/WeightBy                   = "fluence" # or dose
 s:Sc/HadronTLET/IfOutputFileAlreadyExists  = "Overwrite"
-sv:Sc/HadronTLET/Report                    = 2 "Sum" "Standard_Deviation"
 ```
 # Respons function weighted Ambient dose equivalence scorer
 
