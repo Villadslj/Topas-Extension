@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "/home/villads/tools/",
                 "/home/villads/tools/topas/Geant4Headers",
-                "/home/villads/tools/topas/include"
+                "/home/villads/tools/topas/include",
+                "/home/villads/tools/root/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
