@@ -43,7 +43,6 @@ Qeff::Qeff(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM,
 
 	}
 	else {
-		G4cout << "All particles are included in Qeff scoring";
 		includeAll = true;
 	}
 
@@ -168,25 +167,22 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	G4double z_eff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), - 2.0 / 3.0)));
 	G4double Q_eff = (z_eff * z_eff) / (beta * beta);
 	
-	
-	//G4cout << mass_MeV << ", q eff = " << Q_eff << " beta = " << beta << G4endl;
+
 
 
 	G4double weight = 1.0;
 	if (fDoseWeighted){
-		// G4cout << " dose weighted " << G4endl;		
+		// dose weighted;		
 		weight *= total_energy_loss;
-		//G4cout << "weight = " << weight << G4endl;
 	}
 	else{
-		// G4cout << " track weighted " << G4endl;		
+		// track weighted;		
 		weight *= DX;
 	}
 
 	if (dEdx > 0){
 		AccumulateHit(aStep, weight * Q_eff);
-		//AccumulateHit(aStep, weight * Q_eff);
-		//G4cout << "density" << density << G4endl;
+
 		return true;
 	}
 
@@ -206,15 +202,11 @@ G4int Qeff::CombineSubScorers()
 			fFirstMomentMap[index] = 0;
 			counter++;
 		} else {
-			//G4cout << "index = " << index << G4endl;
-			//G4cout << "tæller = " << fFirstMomentMap[index] << G4endl;
-			//G4cout << "denom = " << denomScorer->fFirstMomentMap[index] << G4endl;
+
 			fFirstMomentMap[index] = fFirstMomentMap[index] / denomScorer->fFirstMomentMap[index];
-			
 			if (fFirstMomentMap[index] > QeffMax){
 				G4cout << "fFirstMomentMap" << fFirstMomentMap[index] << G4endl;
 			}
-			//G4cout << "brøk = " << fFirstMomentMap[index] << G4endl;
 		}
 	}
 

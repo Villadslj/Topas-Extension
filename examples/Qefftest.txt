@@ -7,7 +7,7 @@ s:So/MySource/Type                     = "Beam"
 s:So/MySource/Component                = "BeamPosition"
 s:So/MySource/BeamParticle             = "proton"
 i:So/MySource/NumberOfHistoriesInRun   = 10000
-d:So/MySource/BeamEnergy               = 120 MeV
+d:So/MySource/BeamEnergy               = 250 MeV
 d:Ge/MySource/RotX=180. deg
 s:So/MySource/BeamPositionDistribution = "Flat"
 d:So/MySource/BeamPositionCutoffX = 1. cm
@@ -21,7 +21,7 @@ s:outdir = ""
 ########################################
 # Physics
 ########################################
-sv:Ph/Default/Modules = 1 "g4em-standard_opt4"
+# sv:Ph/Default/Modules = 1 "g4em-standard_opt4"
 i:Ts/NumberOfThreads = 0
 # sv:Ph/Default/Modules = 2 "proton" "photons", "electron"
 ########################################
@@ -46,7 +46,7 @@ b:Ts/PauseBeforeQuit = "False"
 d:Ge/World/HLX = 1. m
 d:Ge/World/HLY = 1. m
 d:Ge/World/HLZ = 1. m
-s:Ge/World/Material = "G4_Galactic"
+s:Ge/World/Material = "Air"
 
 # Water Tank / Phantom
 s:Ge/WaterPhantom/Parent 		= "World"
@@ -73,7 +73,7 @@ s:Ge/ScoringZBox/Type       = "TsBox"
 b:Ge/ScoringZBox/IsParallel = "TRUE"
 d:Ge/ScoringZBox/HLX        = 1 cm
 d:Ge/ScoringZBox/HLY        = 1 cm
-d:Ge/ScoringZBox/HLZ        = 10 cm
+d:Ge/ScoringZBox/HLZ        = 15 cm
 s:Ge/ScoringZBox/Color      = "green"
 i:Ge/ScoringZBox/XBins      = 1
 i:Ge/ScoringZBox/YBins      = 1
@@ -95,14 +95,25 @@ sv:Sc/Dose/includeparticles              = 1 "protons"
 b:Sc/Dose/PropagateToChildren = "True"
 s:Sc/Dose/OutputFile =  "Dose"
 sv:Sc/Dose/OnlyIncludeParticlesNamed = 1 "proton"
+# sv:Sc/Dose/Report                    = 2 "Sum" "Standard_Deviation"
 
-s:Sc/Qeff/Quantity                       = "Qeff"
-s:Sc/Qeff/Component                      = "ScoringZBox"
-b:Sc/Qeff/OutputToConsole                = "FALSE"
-s:Sc/Qeff/IfOutputFileAlreadyExists      = "Overwrite"
-sv:Sc/Qeff/includeparticles              = 1 "protons"
-b:Sc/Qeff/PropagateToChildren = "True"
-s:Sc/Qeff/OutputFile =  "Qeff"
+s:Sc/TQeff/Quantity                       = "Qeff"
+s:Sc/TQeff/Component                      = "ScoringZBox"
+b:Sc/TQeff/OutputToConsole                = "FALSE"
+s:Sc/TQeff/IfOutputFileAlreadyExists      = "Overwrite"
+s:Sc/TQeff/WeightBy                       = "fluence"
+b:Sc/TQeff/PropagateToChildren            = "True"
+s:Sc/TQeff/OutputFile                     =  "TQeff"
+# sv:Sc/TQeff/Report                        = 2 "Sum" "Standard_Deviation"
+
+s:Sc/DQeff/Quantity                       = "Qeff"
+s:Sc/DQeff/Component                      = "ScoringZBox"
+b:Sc/DQeff/OutputToConsole                = "FALSE"
+s:Sc/DQeff/IfOutputFileAlreadyExists      = "Overwrite"
+s:Sc/DQeff/WeightBy                       = "dose"
+b:Sc/DQeff/PropagateToChildren            = "True"
+s:Sc/DQeff/OutputFile                     =  "DQeff"
+# sv:Sc/DQeff/Report                        = 2 "Sum" "Standard_Deviation"
 
 s:Sc/PLET/Quantity                       = "ProtonLET"
 s:Sc/PLET/Component                      = "ScoringZBox"
