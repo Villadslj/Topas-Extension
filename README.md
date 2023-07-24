@@ -130,3 +130,16 @@ dv:Sc/scorerAmbDosePerSource/FluenceToDoseConversionValues   = 58
 1.86602e-08 2.18095e-08 2.59623e-08 3.06236e-08 3.51412e-08 3.95922e-08 4.93432e-08 4.67006e-08 4.46069e-08 4.26071e-08
 4.69871e-08 5.15014e-08 5.64495e-08 5.24551e-08 3.61218e-08 2.6443e-08 2.2418e-08 2.95202e-08 3.7933e-08 4.31315e-08
 4.93432e-08 5.27769e-08 5.15014e-08 5.05651e-08 5.96437e-08 7.20944e-08 9.0956e-08 1.17594e-07 Sv*mm2
+```
+# Mixed Beam source
+This is a beam source extension for simulating beams consisting of many different types of particles.
+```
+s:So/MySource/Type                     = "MixedSource"
+s:So/MySource/Component                = "BeamPosition"
+s:So/MySource/BeamParticle             = "proton"
+sv:So/MySource/Particles               = 2 "proton" "neutron" # what particles to simulate
+i:So/MySource/NumberOfHistoriesInRun   = 100000
+uv:So/MySource/MixingFraction          = 2 0.9 0.1 # mixing fraction. This gives 90 % of the No. og histories is protons and 10 % is neutrons
+dv:So/MySource/MonoEnergies             = 2 250 1 MeV # Energy of the particles. In this case the protons have 250 MeV and neutrons 1 MeV
+d:So/MySource/BeamPositionZ= Ge/YourComponent/HLZ + 1.5 cm
+```
