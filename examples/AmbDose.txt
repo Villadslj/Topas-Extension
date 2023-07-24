@@ -105,7 +105,7 @@ s:Sc/scorerAmbDosePerSource/Component                  = "WaterPhantom"
 s:Sc/scorerAmbDosePerSource/OutputFile                 = "AmbientDoseNeutronPerSourceNeutron"
 b:Sc/scorerAmbDosePerSource/OutputToConsole            = "True"
 s:Sc/scorerAmbDosePerSource/IfOutputFileAlreadyExists  = "Overwrite"
-s:Sc/scorerAmbDosePerSource/ImportRespons  = "Wendi2_Respons.csv"
+s:Sc/scorerAmbDosePerSource/ImportRespons  = "Wendi2_Respons.txt"
 sv:Sc/scorerAmbDosePerSource/Report                    = 2 "Sum" "Standard_Deviation"
 # Set the fluence-to-dose conversion factors.
 s:Sc/scorerAmbDosePerSource/GetAmbientDoseEquivalentForParticleNamed = "neutron"
