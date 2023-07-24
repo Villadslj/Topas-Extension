@@ -12,12 +12,12 @@
 
 #include <random>
 
-#include "TsVNtupleScorer.hh"
+#include "TsVBinnedScorer.hh"
 using namespace std;
 
 class G4ParticleDefinition;
 
-class CustomCross : public TsVNtupleScorer
+class CustomCross : public TsVBinnedScorer
 {
 public:
 	CustomCross(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,

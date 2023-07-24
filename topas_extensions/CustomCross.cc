@@ -3,7 +3,7 @@
 // ********************************************************************
 // *                                                                  *
 // * Created by Villads J. 2022                                       *
-// * For scoring proton dosis over an LET threshold
+// * For scoring reaction yield for a specified Cross section         *
 // *                                                                  *
 // ********************************************************************
 //
@@ -22,12 +22,11 @@
 using namespace std;
 
 CustomCross::CustomCross(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
-														   G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer)
-	:TsVNtupleScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
+										   G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer)
+	:TsVBinnedScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
 {
 	SetUnit("");
-	fNtuple->RegisterColumnD(&penergy, "parentE", "MeV");
-	fNtuple->RegisterColumnI(&Count, "Count");
+
 	fProtonDefinition = G4ParticleTable::GetParticleTable()->FindParticle("proton");
 
 	if (!fPm->ParameterExists(GetFullParmName("ImportCross"))){
@@ -91,7 +90,8 @@ G4bool CustomCross::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		// Get particle energy
 		penergy = aStep->GetTrack()->GetKineticEnergy() / MeV;
 		if (penergy < CrossMinE || penergy > CrossMaxE) return false;
-	
+		
+		// Find cross section for that energy
 		int index;
 
 		for(int i = 0; i < row.size(); i+=2){
@@ -101,8 +101,9 @@ G4bool CustomCross::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 				break;
 			}
 		}
-		// Find cross section for that energy
+
 		double Cross = row[index +1];
+		// double Cross = 1;
 		
 		// Find steplength
 		G4double stepLength = aStep->GetStepLength() / m;
@@ -132,8 +133,8 @@ G4bool CustomCross::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 
 		double ReaTest = G4UniformRand();
 		if(ReaTest < propRea){
-			Count = 1;
-			fNtuple->Fill();
+			Count += 1;
+			AccumulateHit(aStep, Count);
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			return true;
 		}
