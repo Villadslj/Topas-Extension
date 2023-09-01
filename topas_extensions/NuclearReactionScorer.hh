@@ -24,6 +24,7 @@ public:
     G4bool ProcessHits(G4Step*,G4TouchableHistory*);
     void ClearParameters();
     void FillEmptyParm();
+    void InitializeSecondaryList(std::vector<G4String>& list, const G4String& parameterName, int& length);
     bool CheckSecondaries(std::vector<G4String>& v1, std::vector<G4String>& v2, int l);
 
 private:
