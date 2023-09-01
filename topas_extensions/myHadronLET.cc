@@ -63,7 +63,7 @@ G4bool myHadronLET::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 
 	// atomic number
     G4int Z = particleDef -> GetAtomicNumber();
-    if (Z<1) return false; // calculate only protons and ions
+    if (Z < 1) return false; // calculate only protons and ions
 
 	G4double energyDeposit = aStep -> GetTotalEnergyDeposit();
 	G4double DX = aStep -> GetStepLength();
@@ -113,14 +113,9 @@ G4bool myHadronLET::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     // use the mean kinetic energy of ions in a step to calculate ICRU stopping power
     G4double dEdx = emCal.ComputeElectronicDEDX(eKinMean, particleDef, materialStep);
 	
-	// G4double total_energy_loss = EnergySecondary + energyDeposit; 
-	G4double total_energy_loss = energyDeposit; 
+	G4double total_energy_loss = EnergySecondary + energyDeposit; 
+	// G4double total_energy_loss = energyDeposit; 
 
-    // // Total LET calculation...
-    // totalLetD[voxel]  += (DE + DEEletrons) * Lsn; // total dose Let Numerator, including secondary electrons energy deposit
-    // DtotalLetD[voxel] += DE + DEEletrons;         // total dose Let Denominator, including secondary electrons energy deposit
-    // totalLetT[voxel]  += DX * Lsn;                // total track Let Numerator
-    // DtotalLetT[voxel] += DX;                      // total track Let Denominator
 	
 	G4double weight = 1.0;
 	if (fDoseWeighted){
