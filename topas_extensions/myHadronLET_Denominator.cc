@@ -95,8 +95,8 @@ G4bool myHadronLET_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 		}		
 	}
 
-	// G4double total_energy_loss = EnergySecondary + energyDeposit; 
-	G4double total_energy_loss = energyDeposit; 
+	G4double total_energy_loss = EnergySecondary + energyDeposit; 
+	// G4double total_energy_loss = energyDeposit; 
 
     // // Total LET calculation...
     // totalLetD[voxel]  += (DE + DEEletrons) * Lsn; // total dose Let Numerator, including secondary electrons energy deposit
