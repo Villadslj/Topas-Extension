@@ -1,6 +1,7 @@
 cmakeTopas.sh
 *.csv
 *.json
+*.root
 .gitignore
 .vscode/c_cpp_properties.json
 tests/buildtopas.sh
