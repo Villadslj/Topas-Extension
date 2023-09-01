@@ -29,10 +29,6 @@ Qeff_Denominator::Qeff_Denominator(TsParameterManager* pM, TsMaterialManager* mM
 
 	fStepCount = 0;
 
-	fProtonDefinition = G4ParticleTable::GetParticleTable()->FindParticle("proton");
-	fElectronDefinition = G4ParticleTable::GetParticleTable()->FindParticle("e-");
-
-	
 
 	// Dose-averaged or fluence-averaged Qeff definition
 	G4String weightType = "dose";
@@ -103,7 +99,7 @@ G4bool Qeff_Denominator::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 
 	// atomic number
     G4int Z = particleDef -> GetAtomicNumber();
-    if (Z<1) return false; // calculate only protons and ions
+    if (Z < 1) return false; // calculate only protons and ions
 
 	G4String particleName =  particleDef -> GetParticleName();
 	G4double energyDeposit = aStep -> GetTotalEnergyDeposit();

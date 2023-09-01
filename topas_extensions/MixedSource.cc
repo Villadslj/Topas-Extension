@@ -143,8 +143,8 @@ if (selectedParticleIndex < DMonoEnergies.size()) {
 // G4RandGauss
 std::normal_distribution<double> distributionX(0, SpotSize/2.335); // Convert to sigma
 std::normal_distribution<double> distributionY(0, SpotSize/2.335);
-p.posX = distributionX(generator) *cm;
-p.posY = distributionY(generator) *cm;
+p.posX = distributionX(generator);
+p.posY = distributionY(generator);
 p.posZ = BeamPositionZ;
 p.dCos1 = 0.0;
 p.dCos2 = 0.0;
