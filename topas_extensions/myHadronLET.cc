@@ -18,6 +18,8 @@
 #include "G4ParticleDefinition.hh"
 #include "G4EmCalculator.hh"
 #include "G4UIcommand.hh"
+#include <cmath>
+
 
 myHadronLET::myHadronLET(TsParameterManager *pM, TsMaterialManager *mM, TsGeometryManager *gM, TsScoringManager *scM, TsExtensionManager *eM,
 							   G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer)
@@ -41,6 +43,12 @@ myHadronLET::myHadronLET(TsParameterManager *pM, TsMaterialManager *mM, TsGeomet
 		G4cerr << "Topas is exiting due to a serious error in scoring setup." << G4endl;
 		G4cerr << GetFullParmName("WeightBy") << " refers to an unknown weighting: " << weightType << G4endl;
 		exit(1);
+	}
+
+	// Get Order 
+	Order = 1;
+	if (fPm->ParameterExists(GetFullParmName("Order"))){
+	Order = fPm->GetUnitlessParameter(GetFullParmName("Order"));
 	}
 	
 	// Instantiate subscorer needed for denominator
@@ -113,6 +121,8 @@ G4bool myHadronLET::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     // use the mean kinetic energy of ions in a step to calculate ICRU stopping power
     G4double dEdx = emCal.ComputeElectronicDEDX(eKinMean, particleDef, materialStep);
 	
+	dEdx = pow(dEdx, Order);
+
 	G4double total_energy_loss = EnergySecondary + energyDeposit; 
 	// G4double total_energy_loss = energyDeposit; 
 

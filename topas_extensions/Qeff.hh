@@ -31,6 +31,7 @@ private:
 	G4double fMaxScoredQeff;
 	G4double fNeglectSecondariesBelowDensity;
 	G4double fUseFluenceWeightedBelowDensity;
+	G4int Order;
 	std::vector<G4ParticleDefinition*> p;
 
 	bool includeAll;

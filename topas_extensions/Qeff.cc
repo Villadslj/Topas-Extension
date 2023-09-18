@@ -15,6 +15,7 @@
 #include "G4ParticleDefinition.hh"
 #include "G4EmCalculator.hh"
 #include "G4UIcommand.hh"
+#include <cmath>
 using namespace std;
 
 
@@ -45,6 +46,12 @@ Qeff::Qeff(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM,
 	else {
 		includeAll = true;
 	}
+	// Get Order 
+	Order = 1;
+	if (fPm->ParameterExists(GetFullParmName("Order"))){
+	Order = fPm->GetUnitlessParameter(GetFullParmName("Order"));
+	}
+
 
 	// Dose-averaged or fluence-averaged LET definition
 	G4String weightType = "dose";
@@ -166,7 +173,7 @@ G4bool Qeff::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 	G4int z = theTrack -> GetParticleDefinition() -> GetAtomicNumber();
 	G4double z_eff = z * (1.0 - exp(-125.0 * beta * pow(abs(z), - 2.0 / 3.0)));
 	G4double Q_eff = (z_eff * z_eff) / (beta * beta);
-	
+	Q_eff = pow(Q_eff, Order);
 
 
 

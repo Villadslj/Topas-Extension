@@ -34,6 +34,7 @@ private:
 	G4double fMaxScoredLET;
 	G4double fNeglectSecondariesBelowDensity;
 	G4double fUseFluenceWeightedBelowDensity;
+	G4int Order;
 
 	G4ParticleDefinition* fProtonDefinition;
 	G4ParticleDefinition* fElectronDefinition;

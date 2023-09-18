@@ -6,7 +6,7 @@
 s:So/MySource/Type                     = "Beam"
 s:So/MySource/Component                = "BeamPosition"
 s:So/MySource/BeamParticle             = "proton"
-i:So/MySource/NumberOfHistoriesInRun   = 50000
+i:So/MySource/NumberOfHistoriesInRun   = 1000
 d:So/MySource/BeamEnergy               = 160 MeV
 d:Ge/MySource/RotX=180. deg
 s:So/MySource/BeamPositionDistribution = "Flat"
@@ -22,7 +22,7 @@ s:outdir = ""
 # Physics
 ########################################
 # sv:Ph/Default/Modules = 1 "g4em-standard_opt4"
-i:Ts/NumberOfThreads = 0
+i:Ts/NumberOfThreads = 4
 # sv:Ph/Default/Modules = 2 "proton" "photons", "electron"
 ########################################
 # Sequence control
@@ -113,4 +113,13 @@ s:Sc/DQeff/IfOutputFileAlreadyExists      = "Overwrite"
 s:Sc/DQeff/WeightBy                       = "dose"
 b:Sc/DQeff/PropagateToChildren            = "True"
 s:Sc/DQeff/OutputFile                     =  "DQeff"
+
+s:Sc/DQeff_Order2/Quantity                       = "Qeff"
+u:Sc/DQeff_Order2/Order                          = 2
+s:Sc/DQeff_Order2/Component                      = "ScoringZBox"
+b:Sc/DQeff_Order2/OutputToConsole                = "FALSE"
+s:Sc/DQeff_Order2/IfOutputFileAlreadyExists      = "Overwrite"
+s:Sc/DQeff_Order2/WeightBy                       = "dose"
+b:Sc/DQeff_Order2/PropagateToChildren            = "True"
+s:Sc/DQeff_Order2/OutputFile                     =  "DQeff_Order2"
 

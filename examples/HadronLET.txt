@@ -6,7 +6,7 @@
 s:So/MySource/Type                     = "Beam"
 s:So/MySource/Component                = "BeamPosition"
 s:So/MySource/BeamParticle             = "proton"
-i:So/MySource/NumberOfHistoriesInRun   = 50000
+i:So/MySource/NumberOfHistoriesInRun   = 1000
 d:So/MySource/BeamEnergy               = 160 MeV
 d:Ge/MySource/RotX=180. deg
 s:So/MySource/BeamPositionDistribution = "Flat"
@@ -22,7 +22,7 @@ s:outdir = ""
 # Physics
 ########################################
 # sv:Ph/Default/Modules = 1 "g4em-standard_opt4"
-i:Ts/NumberOfThreads = 0
+i:Ts/NumberOfThreads = 4
 # sv:Ph/Default/Modules = 2 "proton" "photons", "electron"
 ########################################
 # Sequence control
@@ -113,6 +113,15 @@ s:Sc/DHadronLET/IfOutputFileAlreadyExists      = "Overwrite"
 b:Sc/DHadronLET/PropagateToChildren = "True"
 s:Sc/DHadronLET/WeightBy                     = "dose" # or dose
 s:Sc/DHadronLET/OutputFile =  outdir + "DHadronLET"
+
+s:Sc/DHadronLET_Order2/Quantity                       = "myHadronLET"
+s:Sc/DHadronLET_Order2/Component                      = "ScoringZBox"
+b:Sc/DHadronLET_Order2/OutputToConsole                = "FALSE"
+s:Sc/DHadronLET_Order2/IfOutputFileAlreadyExists      = "Overwrite"
+b:Sc/DHadronLET_Order2/PropagateToChildren = "True"
+u:Sc/DHadronLET_Order2/Order = 2
+s:Sc/DHadronLET_Order2/WeightBy                     = "dose" # or dose
+s:Sc/DHadronLET_Order2/OutputFile =  outdir + "DHadronLET_Order2"
 
 s:Sc/DHadronLET_Protons/Quantity                       = "myHadronLET"
 s:Sc/DHadronLET_Protons/Component                      = "ScoringZBox"
