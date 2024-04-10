@@ -1,0 +1,109 @@
+# Include beam information
+
+########################################
+# beam
+########################################
+s:So/MySource/Type                     = "Beam"
+s:So/MySource/Component                = "BeamPosition"
+s:So/MySource/BeamParticle             = "proton"
+i:So/MySource/NumberOfHistoriesInRun   = 50000
+d:So/MySource/BeamEnergy               = 160 MeV
+d:Ge/MySource/RotX=180. deg
+s:So/MySource/BeamPositionDistribution = "Flat"
+d:So/MySource/BeamPositionCutoffX = 1. cm
+d:So/MySource/BeamPositionCutoffY = 1. cm
+s:So/MySource/BeamPositionCutoffShape = "Rectangle"
+s:So/MySource/BeamAngularDistribution  = "None"
+
+d:So/MySource/BeamPositionZ= Ge/WaterPhantom/HLZ + 1.5 cm
+
+s:outdir = ""
+########################################
+# Physics
+########################################
+# sv:Ph/Default/Modules = 1 "g4em-standard_opt4"
+i:Ts/NumberOfThreads = 4
+# sv:Ph/Default/Modules = 2 "proton" "photons", "electron"
+########################################
+# Sequence control
+########################################
+b:Ts/PauseBeforeSequence = "F"
+i:Ts/ShowHistoryCountAtInterval = 1000 # how often to print history count to the console
+# If set to 0, history count will never be printed
+b:Ts/ShowHistoryCountOnSingleLine = "FALSE" # Make count reuse a single line of console
+i:Tf/Verbosity = 0
+
+
+########################################
+# Graphics
+########################################
+b:Ts/PauseBeforeQuit = "False"
+
+########################################
+# Geometry
+########################################
+
+d:Ge/World/HLX = 5. cm
+d:Ge/World/HLY = 5. cm
+d:Ge/World/HLZ = 22. cm
+s:Ge/World/Material = "Vacuum"
+
+# Water Tank / Phantom
+s:Ge/WaterPhantom/Parent 		= "World"
+s:Ge/WaterPhantom/Type   		= "TsBox"
+s:Ge/WaterPhantom/Material		= "G4_WATER"
+d:Ge/WaterPhantom/HLX 			= 5.0 cm
+d:Ge/WaterPhantom/HLY 			= 5.0 cm
+d:Ge/WaterPhantom/HLZ 			= 20.0 cm
+d:Ge/WaterPhantom/TransX		= 0.0 cm
+d:Ge/WaterPhantom/TransY		= 0.0 cm
+d:Ge/WaterPhantom/TransZ		= 0.0 cm
+d:Ge/WaterPhantom/RotX			= 0. deg
+d:Ge/WaterPhantom/RotY			= 0. deg
+d:Ge/WaterPhantom/RotZ			= 0. deg
+d:Ge/WaterPhantom/MaxStepSize 	= 0.5 mm
+s:Ge/WaterPhantom/Color      = "blue"
+
+########################################
+# Scoring Geometry
+########################################
+
+s:Ge/ScoringZBox/Parent     = "WaterPhantom"
+s:Ge/ScoringZBox/Type       = "TsBox"
+b:Ge/ScoringZBox/IsParallel = "TRUE"
+d:Ge/ScoringZBox/HLX        = 1 cm
+d:Ge/ScoringZBox/HLY        = 1 cm
+d:Ge/ScoringZBox/HLZ        = 15 cm
+s:Ge/ScoringZBox/Color      = "green"
+i:Ge/ScoringZBox/XBins      = 1
+i:Ge/ScoringZBox/YBins      = 1
+i:Ge/ScoringZBox/ZBins      = 300
+d:Ge/ScoringZBox/TransZ    = Ge/WaterPhantom/HLZ - Ge/ScoringZBox/HLZ cm
+d:Ge/ScoringZBox/RotZ=180. deg
+
+
+
+########################################
+# Scoring
+########################################
+
+s:Sc/Dose/Quantity                       = "DoseToMedium"
+s:Sc/Dose/Component                      = "ScoringZBox"
+b:Sc/Dose/OutputToConsole                = "FALSE"
+s:Sc/Dose/IfOutputFileAlreadyExists      = "Overwrite"
+sv:Sc/Dose/includeparticles              = 1 "protons"
+b:Sc/Dose/PropagateToChildren = "True"
+s:Sc/Dose/OutputFile =  "Dose"
+sv:Sc/Dose/OnlyIncludeParticlesNamed = 1 "proton"
+
+s:Sc/Ntuple/Quantity                       = "NuclearReaction"
+s:Sc/Ntuple/OutputType                     = "ASCII"
+s:Sc/Ntuple/Component                      = "WaterPhantom"
+b:Sc/Ntuple/OutputToConsole                = "TRUE" # (optional)
+s:Sc/Ntuple/IfOutputFileAlreadyExists      = "Overwrite" # (optional)
+sv:Sc/Ntuple/Secondaries                   =  1 "neutron"
+# s:Sc/Ntuple/Target                         = "oxygen"
+s:Sc/Ntuple/Projectile                     = "proton"
+b:Sc/Ntuple/PropagateToChildren            = "True" # (optional)
+# s:Sc/Ntuple/OutputFile                     = "Path to output"
+

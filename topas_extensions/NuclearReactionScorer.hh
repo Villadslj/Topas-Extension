@@ -36,6 +36,8 @@ private:
     G4String pAlive;
     G4double parentE;
 
+    void WriteToCSV(const std::string& filename, const std::string& data);
+
     // User parameters
     G4String DTarget;
     G4String DProjectile;

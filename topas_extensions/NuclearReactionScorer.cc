@@ -10,6 +10,8 @@
 #include "G4ParticleTypes.hh"
 #include "G4RunManager.hh"
 #include "G4SteppingManager.hh"
+#include <fstream>
+#include <iostream>
 
 NuclearReactionScorer::NuclearReactionScorer(
     TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM,
@@ -17,14 +19,6 @@ NuclearReactionScorer::NuclearReactionScorer(
     G4String quantity, G4String outFileName, G4bool isSubScorer)
     : TsVNtupleScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
 {
-    // Register columns for data storage in the ntuple
-    fNtuple->RegisterColumnD(&parentE, "parentE", "MeV");
-    fNtuple->RegisterColumnS(&processname, "processname");
-    fNtuple->RegisterColumnS(&projectile, "projectile");
-    fNtuple->RegisterColumnS(&targetName, "targetName");
-    fNtuple->RegisterColumnS(&secondaries, "secondaries");
-    fNtuple->RegisterColumnS(&pAlive, "pAlive");
-
     // Initialize some parameters from the input parameters
     DTarget = fPm->ParameterExists(GetFullParmName("Target"))
                   ? fPm->GetStringParameter(GetFullParmName("Target"))
@@ -146,9 +140,14 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep, G4TouchableHistory*)
             return false;
         }
     }
+
+    std::stringstream data;
+    data << parentE << "," << processname << "," << projectile << "," << targetName << "," << secondaries << "," << pAlive << std::endl;
+
+    // Write data to CSV file
+    std::string csvFileName = "output.csv";
+    WriteToCSV(csvFileName, data.str());
     
-    FillEmptyParm();
-    fNtuple->Fill();
     return true;
 }
 
@@ -162,28 +161,6 @@ void NuclearReactionScorer::ClearParameters()
     parentE = 0;
 }
 
-void NuclearReactionScorer::FillEmptyParm()
-{
-    if (projectile.empty()) {
-        projectile = "empty";
-    }
-    
-    if (processname.empty()) {
-        processname = "empty";
-    }
-    
-    if (targetName.empty()) {
-        targetName = "empty";
-    }
-    
-    if (secondaries.empty()) {
-        secondaries = "empty";
-    }
-    
-    if (pAlive.empty()) {
-        pAlive = "empty";
-    }
-}
 
 bool NuclearReactionScorer::CheckSecondaries(std::vector<G4String>& Test, std::vector<G4String>& real, int l)
 {
@@ -222,4 +199,18 @@ void NuclearReactionScorer::InitializeSecondaryList(std::vector<G4String>& list,
             list.push_back(G4Secondaries[i]);
         }
     }
+}
+
+
+void NuclearReactionScorer::WriteToCSV(const std::string& filename, const std::string& data) {
+    std::ofstream outputFile;
+    outputFile.open(filename, std::ios_base::app); // Open in append mode
+
+    if (!outputFile.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return;
+    }
+
+    outputFile << data;
+    outputFile.close();
 }
