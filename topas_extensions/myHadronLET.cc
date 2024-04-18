@@ -91,31 +91,6 @@ G4bool myHadronLET::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 	// get the material
 	const G4Material * materialStep = aStep -> GetPreStepPoint() -> GetMaterial();
 	
-	// get the secondary paticles
-	G4Step fstep = *theTrack -> GetStep();
-	// store all the secondary partilce in current step
-	const std::vector<const G4Track*> * secondary = fstep.GetSecondaryInCurrentStep();
-	
-	size_t SecondarySize = (*secondary).size();
-	G4double EnergySecondary = 0.;
-	
-	// get secondary electrons energy deposited
-	if (SecondarySize) // calculate only secondary particles
-	{
-		for (size_t numsec = 0; numsec< SecondarySize ; numsec ++)
-		{
-			//Get the PDG code of every secondaty particles in current step
-			G4int PDGSecondary=(*secondary)[numsec]->GetDefinition()->GetPDGEncoding();
-			
-			if(PDGSecondary == 11) // calculate only secondary electrons
-			{
-				// calculate the energy deposit of secondary electrons in current step
-				EnergySecondary += (*secondary)[numsec]->GetKineticEnergy();
-			}
-		}
-		
-	}
-	
     // ICRU stopping power calculation
     G4EmCalculator emCal;
     // use the mean kinetic energy of ions in a step to calculate ICRU stopping power
@@ -123,7 +98,7 @@ G4bool myHadronLET::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 	
 	dEdx = pow(dEdx, Order);
 
-	G4double total_energy_loss = EnergySecondary + energyDeposit; 
+	G4double total_energy_loss = energyDeposit; 
 	// G4double total_energy_loss = energyDeposit; 
 
 	
