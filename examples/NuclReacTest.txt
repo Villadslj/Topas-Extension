@@ -1,0 +1,88 @@
+# Include beam information
+
+########################################
+# beam
+########################################
+s:So/MySource/Type                     = "Beam"
+s:So/MySource/Component                = "BeamPosition"
+s:So/MySource/BeamParticle             = "-2212"
+i:So/MySource/NumberOfHistoriesInRun   = 10000
+d:So/MySource/BeamEnergy               = 50 MeV
+d:Ge/MySource/RotX                     = 180. deg
+s:So/MySource/BeamPositionDistribution = "Gaussian" # None, Flat or Gaussian
+s:So/MySource/BeamPositionCutoffShape = "Ellipse" # Rectangle or Ellipse (if Flat or Gaussian)
+d:So/MySource/BeamPositionCutoffX = 2. mm # X extent of position (if Flat or Gaussian)
+d:So/MySource/BeamPositionCutoffY = 2. mm # Y extent of position (if Flat or Gaussian)
+d:So/MySource/BeamPositionSpreadX = 1 mm # distribution (if Gaussian)
+d:So/MySource/BeamPositionSpreadY = 1 mm # distribution (if Gaussian)
+s:So/MySource/BeamAngularDistribution = "None" # None, Flat or Gaussian
+d:So/MySource/BeamPositionZ= Ge/AddedComp_0/HLZ + 1 cm
+
+s:outdir = ""
+########################################
+# Physics
+########################################
+
+# sv:Ph/Default/Modules = 1 "g4em-standard_opt4"
+i:Ts/NumberOfThreads = 0
+
+# sv:Ph/Default/Modules = 2 "proton" "photons", "electron"
+########################################
+# Sequence control
+########################################
+
+b:Ts/PauseBeforeSequence = "F"
+i:Ts/ShowHistoryCountAtInterval = 10000 # how often to print history count to the console
+# If set to 0, history count will never be printed
+b:Ts/ShowHistoryCountOnSingleLine = "FALSE" # Make count reuse a single line of console
+i:Tf/Verbosity = 0
+
+
+########################################
+# Graphics
+########################################
+# s:Gr/ViewA/Type  = "OpenGL"        # Visualisation tool
+# b:Ts/UseQt = "True"
+
+########################################
+# Geometry
+########################################
+
+d:Ge/World/HLX = 5. cm
+d:Ge/World/HLY = 5. cm
+d:Ge/World/HLZ = 5. cm
+s:Ge/World/Material = "G4_Galactic"
+
+dc:Ge/AddedComp_0/HLX = 1 cm
+dc:Ge/AddedComp_0/HLY = 1 cm
+dc:Ge/AddedComp_0/HLZ = 0.5 cm
+dc:Ge/AddedComp_0/RotX = 0. deg
+dc:Ge/AddedComp_0/RotY = 0. deg
+dc:Ge/AddedComp_0/RotZ = 0. deg
+dc:Ge/AddedComp_0/TransX = 0. mm
+dc:Ge/AddedComp_0/TransY = 0. mm
+dc:Ge/AddedComp_0/TransZ = 0. mm
+ic:Ge/AddedComp_0/XBins = 1
+ic:Ge/AddedComp_0/YBins = 1
+ic:Ge/AddedComp_0/ZBins = 1
+s:Ge/AddedComp_0/Parent = "world"
+s:Ge/AddedComp_0/Type = "TsBox"
+sc:Ge/AddedComp_0/Color = "white"
+sc:Ge/AddedComp_0/DrawingStyle = "FullWireFrame"
+sc:Ge/AddedComp_0/Material = "G4_WATER"
+
+
+########################################
+# Scoring
+########################################
+
+s:Sc/Ntuple/Quantity                       = "NuclearReaction"
+s:Sc/Ntuple/OutputType                     = "ASCII"
+s:Sc/Ntuple/Component                      = "AddedComp_0"
+b:Sc/Ntuple/OutputToConsole                = "TRUE" # (optional)
+s:Sc/Ntuple/IfOutputFileAlreadyExists      = "Overwrite" # (optional)
+sv:Sc/Ntuple/Secondaries                   =  1 "neutron"
+# s:Sc/Ntuple/Target                         = "oxygen"
+# s:Sc/Ntuple/Projectile                     = "proton"
+b:Sc/Ntuple/PropagateToChildren            = "True" # (optional)
+s:Sc/Ntuple/OutputFile                     = "Path to output"
