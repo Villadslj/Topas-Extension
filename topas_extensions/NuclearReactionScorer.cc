@@ -13,12 +13,24 @@
 #include <fstream>
 #include <iostream>
 
+
 NuclearReactionScorer::NuclearReactionScorer(
     TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM,
     TsScoringManager* scM, TsExtensionManager* eM, G4String scorerName,
     G4String quantity, G4String outFileName, G4bool isSubScorer)
     : TsVNtupleScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
 {
+    csvFileName=outFileName;
+    std::ofstream outputFile(outFileName + ".csv", std::ios::trunc);
+    if (outputFile.is_open()) {
+        // File exists, truncate it (delete contents)
+        outputFile.close();
+        // std::cout << "Cleared contents of file: " << outFileName + ".csv" << std::endl;
+    } else {
+        std::cerr << "Error opening file: " << outFileName + ".csv" << std::endl;
+    }
+
+
     // Initialize some parameters from the input parameters
     DTarget = fPm->ParameterExists(GetFullParmName("Target"))
                   ? fPm->GetStringParameter(GetFullParmName("Target"))
@@ -57,7 +69,7 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep, G4TouchableHistory*)
     if (hproc && process->GetProcessType() == 4) {
         target = hproc->GetTargetIsotope();
     }
-
+    
     targetName = target ? target->GetName() : "XXXX";
     projectile = aStep->GetTrack()->GetDefinition()->GetParticleName();
 
@@ -66,12 +78,10 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep, G4TouchableHistory*)
         targetName = "";
     }
 
-    nuclearChannel += aStep->GetTrack()->GetDefinition()->GetParticleName() + " + " + targetName + " -->";
     parentE = startPoint->GetKineticEnergy();
 
     // Secondary particles
     auto secondary = aStep->GetSecondaryInCurrentStep();
-    G4String test = "";
     size_t size_secondary = secondary->size();
 
     if (size_secondary == 0) {
@@ -85,39 +95,23 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep, G4TouchableHistory*)
     }
 
     std::sort(vec_name.begin(), vec_name.end());
-    int first = 0;
     std::unordered_map<std::string, int> particleCount; // Map to store counts of each particle type
+    std::vector<std::string> vec_name2 = {"C13", "neut", "pi+", "pi-", "pi0", "pi0", "pi0", "prot"};
 
-    for (auto name : vec_name) {
-        if (name == "e-" || name == "gamma") {
-            continue;
-        }
-
-        if (particleCount.find(name) == particleCount.end()) {
-            particleCount[name] = 1; // Initialize count to 1 for the first occurrence
-        } else {
-            particleCount[name]++; // Increment the count for subsequent occurrences
-        }
-
-        if (first == 0) {
-            nuclearChannel += name;
-            test += name;
-            secondaries += name.substr(0, 4);
-            first += 1;
-        } else {
-            // Append the count (if greater than 1) in front of the particle name
-            if (particleCount[name] > 1) {
-                nuclearChannel += " + " + std::to_string(particleCount[name]) + " " + name;
-                test += " + " + std::to_string(particleCount[name]) + " " + name;
-                secondaries += " + " + std::to_string(particleCount[name]) + " " + name.substr(0, 4);
-            } else {
-                nuclearChannel += " + " + name;
-                test += " + " + name;
-                secondaries += " + " + name.substr(0, 4);
-            }
-        }
+    // Count occurrences of each string in vec_name
+    for (const auto& name : vec_name) {
+        particleCount[name]++;
     }
-
+    // Construct the secondaries string
+    for (const auto& pair : particleCount) {
+        if (!secondaries.empty()) {
+            secondaries += " + ";
+        }
+        if (pair.second > 1) {
+            secondaries += std::to_string(pair.second) + " ";
+        }
+        secondaries += pair.first;
+    }
     if (aStep->GetTrack()->GetTrackStatus() == fAlive) {
         nuclearChannel += " + " + aStep->GetTrack()->GetDefinition()->GetParticleName();
         G4String particleAlive = aStep->GetTrack()->GetDefinition()->GetParticleName();
@@ -145,7 +139,6 @@ G4bool NuclearReactionScorer::ProcessHits(G4Step* aStep, G4TouchableHistory*)
     data << parentE << "," << processname << "," << projectile << "," << targetName << "," << secondaries << "," << pAlive << std::endl;
 
     // Write data to CSV file
-    std::string csvFileName = "output.csv";
     WriteToCSV(csvFileName, data.str());
     
     return true;
@@ -204,7 +197,7 @@ void NuclearReactionScorer::InitializeSecondaryList(std::vector<G4String>& list,
 
 void NuclearReactionScorer::WriteToCSV(const std::string& filename, const std::string& data) {
     std::ofstream outputFile;
-    outputFile.open(filename, std::ios_base::app); // Open in append mode
+    outputFile.open(filename + ".csv", std::ios_base::app); // Open in append mode
 
     if (!outputFile.is_open()) {
         std::cerr << "Error opening file: " << filename << std::endl;

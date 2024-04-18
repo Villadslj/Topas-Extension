@@ -39,7 +39,7 @@ private:
     void WriteToCSV(const std::string& filename, const std::string& data);
 
     // User parameters
-    G4String DTarget;
+    G4String DTarget, csvFileName;
     G4String DProjectile;
     G4int slength;
     std::vector<G4String> DSecondaries;
