@@ -11,7 +11,7 @@
 #include "G4RunManager.hh"
 #include "G4SteppingManager.hh"
 #include <fstream>
-#include <iostream>
+// #include <iostream>
 
 
 NuclearReactionScorer::NuclearReactionScorer(
@@ -20,6 +20,7 @@ NuclearReactionScorer::NuclearReactionScorer(
     G4String quantity, G4String outFileName, G4bool isSubScorer)
     : TsVNtupleScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
 {
+    G4cout << outFileName << G4endl;
     csvFileName=outFileName;
     std::ofstream outputFile(outFileName + ".csv", std::ios::trunc);
     if (outputFile.is_open()) {
@@ -29,6 +30,12 @@ NuclearReactionScorer::NuclearReactionScorer(
     } else {
         std::cerr << "Error opening file: " << outFileName + ".csv" << std::endl;
     }
+
+    if (fPm->ParameterExists(GetFullParmName("MyFileName"))) {
+		G4String MyFileName = fPm->GetStringParameter(GetFullParmName("MyFileName"));
+        G4cout << MyFileName << G4endl;
+	
+	} 
 
 
     // Initialize some parameters from the input parameters

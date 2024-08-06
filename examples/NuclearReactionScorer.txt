@@ -6,7 +6,7 @@
 s:So/MySource/Type                     = "Beam"
 s:So/MySource/Component                = "BeamPosition"
 s:So/MySource/BeamParticle             = "proton"
-i:So/MySource/NumberOfHistoriesInRun   = 50000
+i:So/MySource/NumberOfHistoriesInRun   = 10000
 d:So/MySource/BeamEnergy               = 160 MeV
 d:Ge/MySource/RotX=180. deg
 s:So/MySource/BeamPositionDistribution = "Flat"
@@ -96,14 +96,15 @@ b:Sc/Dose/PropagateToChildren = "True"
 s:Sc/Dose/OutputFile =  "Dose"
 sv:Sc/Dose/OnlyIncludeParticlesNamed = 1 "proton"
 
+
 s:Sc/Ntuple/Quantity                       = "NuclearReaction"
 s:Sc/Ntuple/OutputType                     = "ASCII"
 s:Sc/Ntuple/Component                      = "WaterPhantom"
-b:Sc/Ntuple/OutputToConsole                = "TRUE" # (optional)
 s:Sc/Ntuple/IfOutputFileAlreadyExists      = "Overwrite" # (optional)
-sv:Sc/Ntuple/Secondaries                   =  1 "neutron"
+sv:Sc/Ntuple/Secondaries                   =  1 "alpha"
 # s:Sc/Ntuple/Target                         = "oxygen"
-s:Sc/Ntuple/Projectile                     = "proton"
+# s:Sc/Ntuple/Projectile                     = "proton"
+s:Sc/Ntuple/OutputFile                     =  "NuclReac"
 b:Sc/Ntuple/PropagateToChildren            = "True" # (optional)
-# s:Sc/Ntuple/OutputFile                     = "Path to output"
+
 
